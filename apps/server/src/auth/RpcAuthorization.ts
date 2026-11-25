@@ -135,7 +135,6 @@ export const RPC_REQUIRED_SCOPES = {
   [WS_METHODS.workflowsGet]: AuthOrchestrationReadScope,
   [WS_METHODS.workflowsGetDefinition]: AuthFilesystemReadScope,
   [WS_METHODS.secretsAnswerRequest]: AuthOrchestrationOperateScope,
-  [WS_METHODS.agentFeedbackAnswerRequest]: AuthOrchestrationOperateScope,
   // Delivery logs hold request bodies, so they need the same scope as the URL.
   [WS_METHODS.scheduledTasksListWebhookDeliveries]: AuthOrchestrationOperateScope,
   [WS_METHODS.scheduledTasksGetWebhookDelivery]: AuthOrchestrationOperateScope,
@@ -199,7 +198,6 @@ export const RPC_REQUIRED_SCOPES = {
   [WS_METHODS.assetsPersistChatAttachments]: AuthOrchestrationOperateScope,
   [WS_METHODS.attachmentsCreateUploadUrl]: AuthOrchestrationOperateScope,
   [WS_METHODS.attachmentsDelete]: AuthOrchestrationOperateScope,
-  [WS_METHODS.providerUploadFeedback]: AuthOrchestrationOperateScope,
   [WS_METHODS.mcpAppsCallTool]: AuthOrchestrationOperateScope,
   [WS_METHODS.mcpAppsToolInfo]: AuthOrchestrationReadScope,
   [WS_METHODS.mcpAppsReadResource]: AuthOrchestrationReadScope,
@@ -365,17 +363,12 @@ const requiredScopesForRpcCall = (
  * RPC, that is when the stream completes. Every RPC passes through here, so it
  * is the one place to observe requests without wrapping each handler.
  */
-export const layer = (
-  scopes: ReadonlyArray<AuthEnvironmentScope>,
-  onAuthorized?: (method: string, payload: unknown) => Effect.Effect<void>,
-) =>
+export const layer = (scopes: ReadonlyArray<AuthEnvironmentScope>) =>
   Layer.succeed(RpcScopeAuthorization)((effect, { rpc, payload }) => {
     const requiredScopes = requiredScopesForRpcCall(rpc._tag, payload);
     const requiredScope = requiredScopes.find((scope) => !scopes.includes(scope));
     if (requiredScope !== undefined) return Effect.fail(rpcAuthorizationError(requiredScope));
-    return onAuthorized === undefined
-      ? effect
-      : Effect.tap(effect, () => onAuthorized(rpc._tag, payload));
+    return effect;
   });
 
 /** Retrying can install or restart tools even though ordinary listing is readable. */

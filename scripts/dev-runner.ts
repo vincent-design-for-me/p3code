@@ -344,10 +344,6 @@ export const createDevRunnerEnv = Effect.fn("dev-runner.createDevRunnerEnv")(fun
   delete output.T3_SERVICE_LAUNCHER_CONTEXT;
   delete output.T3_BOOT_SERVICE_UNIT;
 
-  // Each worktree has its own state, so a dev server would count as a new
-  // install of the developer's real accounts. Set it explicitly to opt in.
-  output.T3CODE_TELEMETRY_ENABLED = baseEnv.T3CODE_TELEMETRY_ENABLED ?? "false";
-
   if (!isDesktopMode) {
     output.T3CODE_PORT = String(serverPort);
     // An inherited HOST pins Vite's HMR socket via explicitHost in apps/web/vite.config.ts.
@@ -701,7 +697,7 @@ const prepareFirstStart = Effect.fn("dev-runner.prepareFirstStart")(function* (i
       );
       if (exitCode !== 0) {
         yield* Effect.logWarning(
-          "[dev-runner] could not build the resource monitor; starting without process telemetry. Install Rust and run `vp run build:resource-monitor`.",
+          "[dev-runner] could not build the resource monitor; starting without process monitoring. Install Rust and run `vp run build:resource-monitor`.",
         );
       }
     }

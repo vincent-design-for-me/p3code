@@ -779,48 +779,6 @@ describe("DesktopBackendConfiguration", () => {
     }).pipe(Effect.scoped, Effect.provide(Layer.mergeAll(NodeServices.layer, NodeCrypto.layer))),
   );
 
-  it.effect("resolveWsl carries the kill switch and resource attributes into the distro", () =>
-    Effect.gen(function* () {
-      const fileSystem = yield* FileSystem.FileSystem;
-      const baseDir = yield* fileSystem.makeTempDirectoryScoped({
-        prefix: "t3-desktop-backend-config-test-",
-      });
-
-      yield* Effect.gen(function* () {
-        const configuration = yield* DesktopBackendConfiguration.DesktopBackendConfiguration;
-        const config = yield* configuration.resolveWsl({ port: 5050, distro: null });
-
-        assert.equal(config.env.OTEL_SDK_DISABLED, "true");
-        assert.include((config.env.WSLENV ?? "").split(":"), "OTEL_SDK_DISABLED");
-        assert.equal(config.env.T3CODE_TELEMETRY_ENABLED, "false");
-        assert.include((config.env.WSLENV ?? "").split(":"), "T3CODE_TELEMETRY_ENABLED");
-        assert.equal(config.env.OTEL_RESOURCE_ATTRIBUTES, "deployment.environment.name=staging");
-        assert.include((config.env.WSLENV ?? "").split(":"), "OTEL_RESOURCE_ATTRIBUTES");
-      }).pipe(
-        Effect.provide(
-          layerBackendConfiguration().pipe(
-            Layer.provideMerge(layerServerExposure),
-            Layer.provideMerge(DesktopAppSettings.layerTest()),
-            Layer.provideMerge(DesktopWslServerTree.layerTest()),
-            Layer.provideMerge(
-              DesktopWslEnvironment.layerTest({
-                isAvailable: true,
-                windowsToWslPath: () => Option.some("/mnt/c/repo/apps/server/src/index.ts"),
-                getDistroIp: () => Option.some("172.27.0.99"),
-              }),
-            ),
-            Layer.provideMerge(layerEnvironment(baseDir, { platform: "win32" })),
-          ),
-        ),
-        Effect.provideService(HostProcess.Environment, {
-          OTEL_SDK_DISABLED: "true",
-          T3CODE_TELEMETRY_ENABLED: "false",
-          OTEL_RESOURCE_ATTRIBUTES: "deployment.environment.name=staging",
-        }),
-      );
-    }).pipe(Effect.scoped, Effect.provide(Layer.mergeAll(NodeServices.layer, NodeCrypto.layer))),
-  );
-
   it.effect("resolveWsl preserves existing WSLENV entries when forwarding backend secrets", () =>
     Effect.gen(function* () {
       const fileSystem = yield* FileSystem.FileSystem;
@@ -841,10 +799,9 @@ describe("DesktopBackendConfiguration", () => {
         assert.equal(config.httpBaseUrl.href, "http://172.27.0.99:5050/");
         assert.equal(config.env.OPENAI_API_KEY, "openai-key");
         assert.equal(config.env.ANTHROPIC_API_KEY, "anthropic-key");
-        assert.equal(config.env.T3CODE_OTLP_PROTOCOL, "http/protobuf");
         assert.equal(
           config.env.WSLENV,
-          "GOPATH/p:OPENAI_API_KEY/u:EMPTY::AZURE_DEVOPS_EXT_PAT/u:T3CODE_DESKTOP_HOST_SCOPE:ANTHROPIC_API_KEY:T3CODE_OTLP_HEADERS:T3CODE_OTLP_PROTOCOL",
+          "GOPATH/p:OPENAI_API_KEY/u:EMPTY::AZURE_DEVOPS_EXT_PAT/u:T3CODE_DESKTOP_HOST_SCOPE:ANTHROPIC_API_KEY",
         );
       }).pipe(
         Effect.provide(

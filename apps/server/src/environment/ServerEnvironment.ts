@@ -241,7 +241,6 @@ export const make = Effect.gen(function* () {
       storageCleanup: true,
       storageCleanupRun: true,
       databaseStorage: true,
-      otlpEndpointCheck: true,
       secretSourceCheck: true,
       projectWorktreeCleanup: true,
       settledWorktreeCleanup: true,
@@ -306,7 +305,6 @@ export const make = Effect.gen(function* () {
       mcpHostedApproval: true,
       shellThreadFamilies: true,
       shellOlderSettled: true,
-      agentFeedback: true,
     },
   };
 

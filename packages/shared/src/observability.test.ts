@@ -25,7 +25,6 @@ import {
   makeTraceSink,
   type EffectTraceRecord,
   type TraceRecord,
-  OtlpHeadersFromString,
   truncateTraceAttributes,
   processServiceInstanceId,
 } from "./observability.ts";
@@ -617,42 +616,5 @@ describe("decodeOtlpTraceRecords", () => {
         status: { code: "0" },
       },
     ]);
-  });
-});
-
-describe("OtlpHeadersFromString", () => {
-  const decode = Schema.decodeUnknownSync(OtlpHeadersFromString);
-
-  it.each([
-    {
-      name: "decodes percent-encoded values",
-      input: "authorization=Basic%20abc%3D%3D,x-tenant=t3",
-      expected: { authorization: "Basic abc==", "x-tenant": "t3" },
-    },
-    {
-      name: "ignores whitespace around separators",
-      input: "authorization=Basic%20abc%3D%3D, x-tenant = t3 ,",
-      expected: { authorization: "Basic abc==", "x-tenant": "t3" },
-    },
-    {
-      name: "keeps literal equals signs inside a value",
-      input: "authorization=Bearer abc==",
-      expected: { authorization: "Bearer abc==" },
-    },
-    {
-      name: "keeps an empty value",
-      input: "x-empty=",
-      expected: { "x-empty": "" },
-    },
-  ])("$name", ({ input, expected }) => {
-    expect(decode(input)).toEqual(expected);
-  });
-
-  it.each([
-    { name: "rejects a pair without a separator", input: "authorization" },
-    { name: "rejects a pair without a key", input: "=value" },
-    { name: "rejects a malformed percent-encoding", input: "authorization=%E0" },
-  ])("$name", ({ input }) => {
-    expect(() => decode(input)).toThrow();
   });
 });

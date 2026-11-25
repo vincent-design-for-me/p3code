@@ -179,7 +179,7 @@ describe("command permissions", () => {
     }),
   );
 
-  it.effect.each([WS_METHODS.serverCheckOtlpEndpoint, WS_METHODS.serverCheckSecretSource])(
+  it.effect.each([WS_METHODS.serverCheckSecretSource])(
     "requires the destination settings grant for %s",
     (method) =>
       Effect.gen(function* () {
@@ -559,21 +559,6 @@ it.effect("requires access management to answer a link request", () =>
         permissions: [AuthAccessWriteScope],
       }),
     );
-    expect(registry.get(answer.permissionAtom(env))).toBe(true);
-    yield* answer.authorize(registry, env);
-  }),
-);
-
-it.effect("requires thread operation to answer a feedback card", () =>
-  Effect.gen(function* () {
-    const registry = yield* setup;
-    registry.set(sessions(env), AsyncResult.success(grant(false)));
-    const answer = createCommandPermissions(runtime, WS_METHODS.agentFeedbackAnswerRequest);
-    expect(registry.get(answer.permissionAtom(env))).toBe(false);
-    expect((yield* answer.authorize(registry, env).pipe(Effect.flip)).requiredPermission).toBe(
-      AuthOrchestrationOperateScope,
-    );
-    registry.set(sessions(env), AsyncResult.success(grant(true)));
     expect(registry.get(answer.permissionAtom(env))).toBe(true);
     yield* answer.authorize(registry, env);
   }),

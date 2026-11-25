@@ -27,17 +27,6 @@ export const ProviderSendTurnInput = Schema.Struct({
 });
 export type ProviderSendTurnInput = typeof ProviderSendTurnInput.Type;
 
-export const ProviderUploadFeedbackInput = Schema.Struct({
-  threadId: ThreadId,
-  reason: Schema.optional(TrimmedNonEmptyString),
-});
-export type ProviderUploadFeedbackInput = typeof ProviderUploadFeedbackInput.Type;
-
-export const ProviderUploadFeedbackResult = Schema.Struct({
-  feedbackId: TrimmedNonEmptyString,
-});
-export type ProviderUploadFeedbackResult = typeof ProviderUploadFeedbackResult.Type;
-
 const McpServerName = TrimmedNonEmptyString.check(Schema.isMaxLength(256));
 
 /** One of an agent's MCP servers, in the thread whose session asked for a sign-in. */
@@ -79,17 +68,5 @@ export class ProviderMcpSignInError extends Schema.TaggedError<ProviderMcpSignIn
 ) {
   override get message(): string {
     return this.detail;
-  }
-}
-
-export class ProviderUploadFeedbackError extends Schema.TaggedError<ProviderUploadFeedbackError>()(
-  "ProviderUploadFeedbackError",
-  {
-    threadId: ThreadId,
-    cause: Schema.optional(Schema.Defect()),
-  },
-) {
-  override get message(): string {
-    return `Failed to upload feedback for thread ${this.threadId}.`;
   }
 }

@@ -94,7 +94,6 @@ import {
   formatClaudeResumeCompactionQuestion,
 } from "@t3tools/shared/claudeCompaction";
 import {
-  type AgentFeedbackMode,
   type ChatAttachment,
   PROVIDER_SEND_TURN_MAX_FILE_BYTES,
   ClaudeSettings,
@@ -2536,7 +2535,6 @@ export function makeClaudeQueryOptions(input: {
   readonly sdkSettings?: string | ClaudeSdkSettings;
   readonly environment?: NodeJS.ProcessEnv;
   readonly mcpServers?: ClaudeQueryOptions["mcpServers"];
-  readonly agentFeedback?: AgentFeedbackMode;
   /** The thread's T3 MCP session holds the `device` capability. */
   readonly deviceToolsAvailable?: boolean;
   readonly tools?: ClaudeAgentSdkQueryTools;
@@ -2642,7 +2640,6 @@ export function makeClaudeQueryOptions(input: {
           },
         } as ClaudeSdkSettings);
   const deviceInstructions = input.mcpServers !== undefined && input.deviceToolsAvailable === true;
-  const agentFeedback = input.mcpServers === undefined ? "off" : (input.agentFeedback ?? "off");
   const options: ClaudeAgentSdkQueryOptions = {
     model: compiledSelection.apiModelId,
     // T3 names threads; a supplied title skips Claude's redundant naming request.
@@ -2698,7 +2695,6 @@ export function makeClaudeQueryOptions(input: {
       append: [
         buildRuntimeInstructions({
           harness: "Claude Code",
-          agentFeedback,
           runtimePolicy: { cwd: input.cwd, workspace: input.workspace },
         }) +
           (input.mcpServers === undefined
@@ -13699,7 +13695,6 @@ export const makeClaudeAdapterV2 = Effect.fn("makeClaudeAdapterV2")(function* (
           const shouldResume =
             resumeSessionAt !== undefined || openedWithResume || hasPersistedProviderTurn;
           const queryOptions = makeClaudeQueryOptions({
-            agentFeedback: turnInput.agentFeedback ?? "off",
             modelSelection: turnInput.modelSelection,
             modelCatalog: catalog,
             nativeThreadId,

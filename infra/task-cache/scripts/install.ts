@@ -1,4 +1,3 @@
-/* oxlint-disable t3code/no-global-process-runtime -- Standalone setup must run before workspace dependencies are installed. */
 // @effect-diagnostics nodeBuiltinImport:off - standalone bootstrap also runs before dependencies are installed.
 // @effect-diagnostics globalConsole:off globalFetch:off globalDate:off - interactive setup and endpoint verification.
 import * as NodeCrypto from "node:crypto";
@@ -45,7 +44,7 @@ if (process.argv.includes("--uninstall")) {
   }
   await NodeFSP.rm(NodePath.join(state, "credentials.json"), { force: true });
   await NodeFSP.rm(NodePath.join(state, "env"), { force: true });
-  await NodeFSP.rm(NodePath.join(home, ".cache/t3-task-cache/telemetry"), {
+  await NodeFSP.rm(NodePath.join(home, ".cache/t3-task-cache"), {
     recursive: true,
     force: true,
   });
@@ -155,26 +154,13 @@ if (
     "Use an HTTPS cache endpoint without embedded credentials, query, or fragment (HTTP is only allowed on loopback).",
   );
 endpoint = url.href.replace(/\/$/, "");
-const response = await fetch(`${endpoint}/telemetry`, {
-  method: "POST",
-  headers: {
-    Authorization: `Basic ${Buffer.from(`${name}:${token}`).toString("base64")}`,
-    "Content-Type": "application/json",
-  },
-  body: JSON.stringify({
-    id: NodeCrypto.randomBytes(32).toString("hex"),
-    recordedAt: Date.now(),
-    host: NodeOS.hostname(),
-    platform: NodeOS.platform(),
-    arch: NodeOS.arch(),
-    ci: false,
-    runId: "setup",
-    tasks: [],
-  }),
+// A valid developer credential passes identity and misses the probe blob; anything else failed.
+const response = await fetch(`${endpoint}/blob/00000000-0000-0000-0000-000000000000`, {
+  headers: { Authorization: `Basic ${Buffer.from(`${name}:${token}`).toString("base64")}` },
   signal: AbortSignal.timeout(10_000),
 });
 await response.body?.cancel();
-if (!response.ok)
+if (response.status !== 404)
   throw new Error(`Credential verification failed (${response.status}); nothing was installed.`);
 
 const candidates = [NodePath.join(root, "node_modules/vite-plus/dist/bin.js")];
@@ -215,8 +201,6 @@ await NodeFSP.writeFile(NodePath.join(installed, "package.json"), '{"type":"modu
 for (const file of [
   "runHook.ts",
   "remoteCache.ts",
-  "flush.ts",
-  "telemetry.ts",
   "nativeHook.js",
   "nativeRunHook.js",
   "preload.mjs",
@@ -243,13 +227,7 @@ for (const [path, { original }] of targets) {
   await NodeFSP.rm(`${path}.before-task-cache`, { force: true });
   await NodeFSP.rm(NodePath.join(NodePath.dirname(path), "run-hook.js"), { force: true });
 }
-for (const file of [
-  "nativeHook.ts",
-  "launcher-telemetry.ts",
-  "launcherTelemetry.ts",
-  "vp.ts",
-  "bin",
-])
+for (const file of ["nativeHook.ts", "vp.ts", "bin"])
   await NodeFSP.rm(NodePath.join(installed, file), { recursive: true, force: true });
 await NodeFSP.mkdir(state, { recursive: true, mode: 0o700 });
 credentials[endpoint] = { name, token };

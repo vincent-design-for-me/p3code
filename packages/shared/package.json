@@ -59,10 +59,6 @@
       "types": "./src/projectMonogram.ts",
       "import": "./src/projectMonogram.ts"
     },
-    "./mobileSourceMaps": {
-      "types": "./src/mobileSourceMaps.ts",
-      "import": "./src/mobileSourceMaps.ts"
-    },
     "./model": {
       "types": "./src/model.ts",
       "import": "./src/model.ts"
@@ -94,10 +90,6 @@
     "./observability": {
       "types": "./src/observability.ts",
       "import": "./src/observability.ts"
-    },
-    "./otelEnvironment": {
-      "types": "./src/otelEnvironment.ts",
-      "import": "./src/otelEnvironment.ts"
     },
     "./httpObservability": {
       "types": "./src/httpObservability.ts",
@@ -235,10 +227,6 @@
       "types": "./src/dpopCommon.ts",
       "import": "./src/dpopCommon.ts"
     },
-    "./telemetryId": {
-      "types": "./src/telemetryId.ts",
-      "import": "./src/telemetryId.ts"
-    },
     "./relayAuth": {
       "types": "./src/relayAuth.ts",
       "import": "./src/relayAuth.ts"
@@ -346,10 +334,6 @@
     "./relayClient": {
       "types": "./src/relayClient.ts",
       "import": "./src/relayClient.ts"
-    },
-    "./relayTracing": {
-      "types": "./src/relayTracing.ts",
-      "import": "./src/relayTracing.ts"
     },
     "./preview": {
       "types": "./src/preview.ts",

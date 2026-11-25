@@ -1,6 +1,5 @@
 import type { OrchestrationV2HistoricalMessage } from "@t3tools/contracts";
 import {
-  type AgentFeedbackMode,
   ChatAttachment,
   CheckpointId,
   MessageId,
@@ -587,7 +586,6 @@ export interface ProviderAdapterV2EnsureThreadInput {
 }
 
 export interface ProviderAdapterV2TurnInput {
-  readonly agentFeedback?: AgentFeedbackMode;
   readonly appThread: OrchestrationV2AppThread;
   readonly threadId: ThreadId;
   readonly runId: RunId;
@@ -863,10 +861,6 @@ export interface ProviderAdapterV2SessionRuntime {
   readonly readThreadSnapshot: (
     input: ProviderAdapterV2ReadThreadSnapshotInput,
   ) => Effect.Effect<ProviderAdapterV2ThreadSnapshot, ProviderAdapterV2Error>;
-  readonly uploadFeedback?: (input: {
-    readonly providerThread: OrchestrationV2ProviderThread;
-    readonly reason?: string;
-  }) => Effect.Effect<{ readonly feedbackId: string }, ProviderAdapterV2Error>;
   /** Absent means non-interactive apps with plain tool rows. */
   readonly mcpApps?: ProviderAdapterV2McpApps;
   /** Absent when the agent has no way to sign an MCP server in. */

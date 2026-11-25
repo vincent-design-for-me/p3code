@@ -43,7 +43,6 @@ import {
 import { GuestBubbleTint, GuestMessageName } from "./guestMessageStyle";
 import { ThreadGuestPendingMessage, useThreadGuestShare } from "./ThreadGuestShareBar";
 import { LinkRequestCard } from "./LinkRequestCard";
-import { FeedbackRequestCard } from "./FeedbackRequestCard";
 import { SecretRequestCard } from "./SecretRequestCard";
 import { AppActivityIndicator } from "../../components/ui/AppActivityIndicator";
 import {
@@ -2204,14 +2203,9 @@ function renderFeedEntry(
     );
   }
 
+  // Agent feedback is not supported; a stored request from an older server renders nothing.
   if (entry.type === "activity-group" && isFeedbackRequestActivityGroup(entry)) {
-    return (
-      <FeedbackRequestCard
-        environmentId={props.environmentId}
-        projectedItem={entry.activities[0]!.projectedItem}
-        iconColor={iconSubtleColor}
-      />
-    );
+    return null;
   }
 
   if (entry.type === "activity-group" && isLinkRequestActivityGroup(entry)) {

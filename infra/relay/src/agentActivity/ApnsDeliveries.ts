@@ -44,7 +44,6 @@ import * as DeliveryAttempts from "./DeliveryAttempts.ts";
 import * as LiveActivities from "./LiveActivities.ts";
 import * as RelayConfiguration from "../Config.ts";
 import * as ApnsDeliveryQueue from "./ApnsDeliveryQueue.ts";
-import { withSpanAttributes } from "../observability.ts";
 
 import {
   alertForAttentionTransition,
@@ -1008,7 +1007,7 @@ const make = Effect.gen(function* () {
             notification: payload.notification,
           });
       }
-    }).pipe(withSpanAttributes({ "user.id": payload.target.userId }));
+    });
   });
 
   const processBatch: ApnsDeliveries["Service"]["processBatch"] = Effect.fn(

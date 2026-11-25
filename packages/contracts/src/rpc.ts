@@ -192,9 +192,6 @@ import {
   ProviderMcpSignInError,
   ProviderMcpSignInStartInput,
   ProviderMcpSignInStartResult,
-  ProviderUploadFeedbackError,
-  ProviderUploadFeedbackInput,
-  ProviderUploadFeedbackResult,
 } from "./provider.ts";
 import { ProviderInstanceId, ProviderInstanceMutation } from "./providerInstance.ts";
 import {
@@ -371,11 +368,9 @@ import {
 import {
   ServerConfigStreamEvent,
   DesktopUpdateCommitInput,
-  OtlpEndpointCheckInput,
   ServerPrepareTriageError,
   ServerPrepareTriageInput,
   ServerPrepareTriageResult,
-  OtlpEndpointCheckResult,
   ServerConfig,
   ServerProviderUpdateError,
   ServerProviderUpdateInput,
@@ -457,7 +452,6 @@ import {
   ScheduledTaskMutationResult,
 } from "./scheduledTask.ts";
 import { SecretRequestAnswerInput, SecretRequestError } from "./secretRequest.ts";
-import { AgentFeedbackAnswerInput, AgentFeedbackRequestError } from "./agentFeedback.ts";
 import {
   ProjectCloneActionInput,
   ProjectCloneActionResult,
@@ -520,7 +514,6 @@ export const WS_METHODS = {
   mcpAppsReadResource: "mcpApps.readResource",
   mcpAppsUpdateModelContext: "mcpApps.updateModelContext",
 
-  providerUploadFeedback: "provider.uploadFeedback",
   providerMcpSignInStart: "provider.mcpSignIn.start",
   providerMcpSignInComplete: "provider.mcpSignIn.complete",
   providerAuthStart: "provider.auth.start",
@@ -630,7 +623,6 @@ export const WS_METHODS = {
   serverGetProcessResourceHistory: "server.getProcessResourceHistory",
   serverGetResourceTelemetryHistory: "server.getResourceTelemetryHistory",
   serverRetryResourceTelemetry: "server.retryResourceTelemetry",
-  serverCheckOtlpEndpoint: "server.checkOtlpEndpoint",
   serverListTextGeneratorModels: "server.listTextGeneratorModels",
   serverPrepareTriage: "server.prepareTriage",
   serverSignalProcess: "server.signalProcess",
@@ -655,7 +647,6 @@ export const WS_METHODS = {
   scheduledTasksRunNow: "scheduledTasks.runNow",
   scheduledTasksRotateWebhookToken: "scheduledTasks.rotateWebhookToken",
   secretsAnswerRequest: "secrets.answerRequest",
-  agentFeedbackAnswerRequest: "agentFeedback.answerRequest",
   guestShareCreate: "guestShare.create",
   scheduledTasksListWebhookDeliveries: "scheduledTasks.listWebhookDeliveries",
   scheduledTasksGetWebhookDelivery: "scheduledTasks.getWebhookDelivery",
@@ -1155,12 +1146,6 @@ const WsServerGetResourceTelemetryHistoryRpc = Rpc.make(
 const WsServerRetryResourceTelemetryRpc = Rpc.make(WS_METHODS.serverRetryResourceTelemetry, {
   payload: Schema.Struct({}),
   success: ResourceTelemetryRetryResult,
-  error: EnvironmentAuthorizationError,
-});
-
-const WsServerCheckOtlpEndpointRpc = Rpc.make(WS_METHODS.serverCheckOtlpEndpoint, {
-  payload: OtlpEndpointCheckInput,
-  success: OtlpEndpointCheckResult,
   error: EnvironmentAuthorizationError,
 });
 
@@ -1807,12 +1792,6 @@ const WsMcpAppsReadResourceRpc = Rpc.make(WS_METHODS.mcpAppsReadResource, {
   error: Schema.Union([McpAppRequestError, EnvironmentAuthorizationError]),
 });
 
-const WsProviderUploadFeedbackRpc = Rpc.make(WS_METHODS.providerUploadFeedback, {
-  payload: ProviderUploadFeedbackInput,
-  success: ProviderUploadFeedbackResult,
-  error: Schema.Union([ProviderUploadFeedbackError, EnvironmentAuthorizationError]),
-});
-
 const WsProviderMcpSignInStartRpc = Rpc.make(WS_METHODS.providerMcpSignInStart, {
   payload: ProviderMcpSignInStartInput,
   success: ProviderMcpSignInStartResult,
@@ -2433,11 +2412,6 @@ const WsSecretsAnswerRequestRpc = Rpc.make(WS_METHODS.secretsAnswerRequest, {
   error: Schema.Union([SecretRequestError, EnvironmentAuthorizationError]),
 });
 
-const WsAgentFeedbackAnswerRequestRpc = Rpc.make(WS_METHODS.agentFeedbackAnswerRequest, {
-  payload: AgentFeedbackAnswerInput,
-  error: Schema.Union([AgentFeedbackRequestError, EnvironmentAuthorizationError]),
-});
-
 const WsScheduledTasksListWebhookDeliveriesRpc = Rpc.make(
   WS_METHODS.scheduledTasksListWebhookDeliveries,
   {
@@ -2551,7 +2525,6 @@ export const WsRpcGroup = RpcGroup.make(
   WsServerGetProcessResourceHistoryRpc,
   WsServerGetResourceTelemetryHistoryRpc,
   WsServerRetryResourceTelemetryRpc,
-  WsServerCheckOtlpEndpointRpc,
   WsServerListTextGeneratorModelsRpc,
   WsServerPrepareTriageRpc,
   WsServerGetUsageSummaryRpc,
@@ -2573,7 +2546,6 @@ export const WsRpcGroup = RpcGroup.make(
   WsScheduledTasksRunNowRpc,
   WsScheduledTasksRotateWebhookTokenRpc,
   WsSecretsAnswerRequestRpc,
-  WsAgentFeedbackAnswerRequestRpc,
   WsScheduledTasksListWebhookDeliveriesRpc,
   WsScheduledTasksGetWebhookDeliveryRpc,
   WsServerReportClientActivityRpc,
@@ -2656,7 +2628,6 @@ export const WsRpcGroup = RpcGroup.make(
   WsMcpAppsToolInfoRpc,
   WsMcpAppsReadResourceRpc,
   WsMcpAppsUpdateModelContextRpc,
-  WsProviderUploadFeedbackRpc,
   WsProviderMcpSignInStartRpc,
   WsProviderMcpSignInCompleteRpc,
   WsSubscribeVcsStatusRpc,

@@ -28,8 +28,6 @@ on:
     secrets:
       EXPO_PRODUCTION_TOKEN:
         required: true
-      MOBILE_SOURCEMAPS_R2:
-        required: false
 
 permissions:
   contents: read
@@ -82,7 +80,6 @@ jobs:
           environment: production
           expo-token: ${{ secrets.EXPO_PRODUCTION_TOKEN }}
           output: ${{ runner.temp }}/t3code.aab
-          sourcemaps-r2: ${{ secrets.MOBILE_SOURCEMAPS_R2 }}
 
       - name: Check ABIs
         if: steps.record.outputs.built != 'true'
@@ -157,7 +154,6 @@ jobs:
           environment: production
           expo-token: ${{ secrets.EXPO_PRODUCTION_TOKEN }}
           output: ${{ runner.temp }}/t3code.ipa
-          sourcemaps-r2: ${{ secrets.MOBILE_SOURCEMAPS_R2 }}
 
       - id: submit
         name: Submit to App Store Connect

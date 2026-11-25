@@ -1052,13 +1052,6 @@ const SecretProviderConfigWrite = Schema.Struct({
 export const SourceControlHostSettings = Schema.Record(Schema.String, Schema.Unknown);
 export type SourceControlHostSettings = typeof SourceControlHostSettings.Type;
 
-export const ObservabilitySettings = Schema.Struct({
-  otlpTracesUrl: TrimmedString.pipe(Schema.withDecodingDefault(Effect.succeed(""))),
-  otlpMetricsUrl: TrimmedString.pipe(Schema.withDecodingDefault(Effect.succeed(""))),
-  otlpLogsUrl: TrimmedString.pipe(Schema.withDecodingDefault(Effect.succeed(""))),
-});
-export type ObservabilitySettings = typeof ObservabilitySettings.Type;
-
 export const SourceControlWritingStyleMode = Schema.Literals([
   "repo_conventions",
   "conventional_commits",
@@ -1150,10 +1143,6 @@ export type BackgroundActivitySettings = typeof BackgroundActivitySettings.Type;
 
 export const ResponseStreamingMode = Schema.Literals(["turn", "paragraph"]);
 export type ResponseStreamingMode = typeof ResponseStreamingMode.Type;
-
-/** `on-request`: agents report only when the user asks. `auto`: they also report on their own. */
-export const AgentFeedbackMode = Schema.Literals(["off", "on-request", "auto"]);
-export type AgentFeedbackMode = typeof AgentFeedbackMode.Type;
 
 const StorageRetentionDays = Schema.NullOr(
   Schema.Int.check(Schema.isBetween({ minimum: 1, maximum: 3650 })),
@@ -1411,9 +1400,6 @@ export const ServerSettings = Schema.Struct({
   responseStreamingMode: ResponseStreamingMode.pipe(
     Schema.withDecodingDefault(Effect.succeed("paragraph" as const)),
   ),
-  agentFeedback: Schema.Struct({
-    mode: AgentFeedbackMode.pipe(Schema.withDecodingDefaultKey(Effect.succeed("off" as const))),
-  }).pipe(Schema.withDecodingDefault(Effect.succeed({ mode: "off" as const }))),
   enableProviderUpdateChecks: Schema.Boolean.pipe(Schema.withDecodingDefault(Effect.succeed(true))),
   continueThreadsAfterServerUpdate: Schema.Boolean.pipe(
     Schema.withDecodingDefault(Effect.succeed(true)),
@@ -1608,7 +1594,6 @@ export const ServerSettings = Schema.Struct({
   providerInstances: Schema.Record(ProviderInstanceId, ProviderInstanceConfig).pipe(
     Schema.withDecodingDefault(Effect.succeed({})),
   ),
-  observability: ObservabilitySettings.pipe(Schema.withDecodingDefault(Effect.succeed({}))),
   sourceControlHosts: Schema.Record(Schema.String, SourceControlHostSettings).pipe(
     Schema.withDecodingDefault(Effect.succeed({})),
   ),
@@ -1891,7 +1876,6 @@ export const ServerSettingsPatch = Schema.Struct({
   worktreesDirectory: Schema.optionalKey(TrimmedString),
   fastWorktreeCheckout: Schema.optionalKey(Schema.Boolean),
   responseStreamingMode: Schema.optionalKey(ResponseStreamingMode),
-  agentFeedback: Schema.optionalKey(Schema.Struct({ mode: AgentFeedbackMode })),
   enableProviderUpdateChecks: Schema.optionalKey(Schema.Boolean),
   continueThreadsAfterServerUpdate: Schema.optionalKey(Schema.Boolean),
   keepAwakeWhileAgentsWork: Schema.optionalKey(Schema.Boolean),
@@ -1999,13 +1983,6 @@ export const ServerSettingsPatch = Schema.Struct({
   reviewGuideModelSelection: Schema.optionalKey(Schema.NullOr(ModelSelection)),
   reviewGuideInstructions: Schema.optionalKey(TrimmedString),
   pullRequestMergeMethod: Schema.optionalKey(Schema.NullOr(PullRequestMergeMethod)),
-  observability: Schema.optionalKey(
-    Schema.Struct({
-      otlpTracesUrl: Schema.optionalKey(TrimmedString),
-      otlpMetricsUrl: Schema.optionalKey(TrimmedString),
-      otlpLogsUrl: Schema.optionalKey(TrimmedString),
-    }),
-  ),
   /** Merges per host, replacing patched fields whole; redaction markers retain secrets, empty secrets remove them. A non-empty token map keeps the saved tokens of hosts it omits; an empty map clears them all. */
   sourceControlHosts: Schema.optionalKey(Schema.Record(Schema.String, SourceControlHostSettings)),
   offeredSourceControlProviders: Schema.optionalKey(Schema.Record(Schema.String, Schema.Boolean)),

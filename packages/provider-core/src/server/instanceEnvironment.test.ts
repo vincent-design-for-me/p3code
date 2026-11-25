@@ -7,6 +7,14 @@ import * as HostProcess from "@t3tools/shared/HostProcess";
 
 import { mergeProviderInstanceEnvironment } from "./instanceEnvironment.ts";
 
+const OPT_OUTS = {
+  DO_NOT_TRACK: "1",
+  DISABLE_TELEMETRY: "1",
+  DISABLE_ERROR_REPORTING: "1",
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+  OPENCODE_DISABLE_TELEMETRY: "1",
+};
+
 describe("mergeProviderInstanceEnvironment", () => {
   it.effect.each([
     { value: "~/.account", tail: ".account" },
@@ -30,6 +38,7 @@ describe("mergeProviderInstanceEnvironment", () => {
       );
 
       expect(environment).toEqual({
+        ...OPT_OUTS,
         CODEX_HOME: path.join("/home/ada", tail),
         CLAUDE_CONFIG_DIR: path.join("/home/ada", tail),
         GROK_HOME: path.join("/home/ada", tail),
@@ -55,7 +64,7 @@ describe("mergeProviderInstanceEnvironment", () => {
           [{ name: "CUSTOM_VALUE", value: "~/.custom", sensitive: false }],
           baseEnv,
         ),
-      ).toEqual({ ...baseEnv, CUSTOM_VALUE: "~/.custom" });
+      ).toEqual({ ...OPT_OUTS, ...baseEnv, CUSTOM_VALUE: "~/.custom" });
     }),
   );
 
@@ -123,6 +132,7 @@ describe("mergeProviderInstanceEnvironment", () => {
         });
 
         expect(merged).toEqual({
+          ...OPT_OUTS,
           PATH: ":/usr/bin",
           LD_LIBRARY_PATH: keptLibraryPath,
           XDG_DATA_DIRS: "/usr/share",
@@ -147,14 +157,36 @@ describe("mergeProviderInstanceEnvironment", () => {
           Effect.provideService(HostProcess.Platform, "win32"),
           Effect.provideService(HostProcess.HomeDirectory, "/home/ada"),
         ),
-      ).toEqual({ CODEX_HOME: "/home/ada/corp" });
+      ).toEqual({ ...OPT_OUTS, CODEX_HOME: "/home/ada/corp" });
       // Upper case sorts first, so it also wins where a spawn merges the parent environment back.
-      expect(yield* merge("win32")).toEqual({ HTTPS_PROXY: "http://gateway", PATH: "/bin" });
+      expect(yield* merge("win32")).toEqual({
+        ...OPT_OUTS,
+        HTTPS_PROXY: "http://gateway",
+        PATH: "/bin",
+      });
       expect(yield* merge("linux")).toEqual({
+        ...OPT_OUTS,
         HTTPS_PROXY: "http://mine",
         Https_Proxy: "http://gateway",
         PATH: "/bin",
       });
+    }),
+  );
+
+  it.effect("defaults provider subprocesses to telemetry opt-out when using process.env", () =>
+    Effect.gen(function* () {
+      const env = yield* mergeProviderInstanceEnvironment(undefined);
+      expect(env).toMatchObject(OPT_OUTS);
+    }),
+  );
+
+  it.effect("opts out under an explicit base env, and a value the user set still wins", () =>
+    Effect.gen(function* () {
+      const env = yield* mergeProviderInstanceEnvironment(undefined, {
+        PATH: "/usr/bin",
+        DO_NOT_TRACK: "0",
+      });
+      expect(env).toMatchObject({ PATH: "/usr/bin", DO_NOT_TRACK: "0", DISABLE_TELEMETRY: "1" });
     }),
   );
 });

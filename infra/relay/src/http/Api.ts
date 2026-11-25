@@ -79,7 +79,6 @@ import * as ManagedEndpointAllocations from "../environments/ManagedEndpointAllo
 import * as EnvironmentPublishSignatures from "../environments/EnvironmentPublishSignatures.ts";
 import * as MobileRegistrations from "../agentActivity/MobileRegistrations.ts";
 import * as T3ChatAccounts from "../t3chat/T3ChatAccounts.ts";
-import { withSpanAttributes } from "../observability.ts";
 import { isRelayHookPath, redactRelayHookUrl } from "../hooks/HookForwarder.ts";
 import * as RelayDb from "../db.ts";
 
@@ -331,7 +330,6 @@ export const layerClientAuth = Layer.effect(
         });
 
         return yield* httpEffect.pipe(
-          withSpanAttributes({ "user.id": verified.sub }),
           Effect.provideService(RelayClientPrincipal, {
             userId: verified.sub,
             token,
@@ -365,9 +363,6 @@ export const layerEnvironmentAuth = Layer.effect(
           "relay.auth.mode": "environment_credential",
         });
         return yield* httpEffect.pipe(
-          withSpanAttributes({
-            "relay.environment_id": principal.value.environmentId,
-          }),
           Effect.provideService(RelayEnvironmentPrincipal, principal.value),
         );
       }),
@@ -396,7 +391,6 @@ export const layerDpopClientAuth = Layer.effect(
           "relay.auth.subject": verified.sub,
         });
         return yield* httpEffect.pipe(
-          withSpanAttributes({ "user.id": verified.sub }),
           Effect.provideService(RelayClientPrincipal, {
             userId: verified.sub,
             token,

@@ -2941,7 +2941,6 @@ export const makeCursorAdapterV2 = Effect.fn("makeCursorAdapterV2")(function* (
             });
           }
           const runtimeInstructions = buildRuntimeInstructions({
-            agentFeedback: mcpServers === undefined ? "off" : (turnInput.agentFeedback ?? "off"),
             harness: "Cursor",
             model: turnInput.modelSelection.model,
             runtimePolicy: turnInput.runtimePolicy,

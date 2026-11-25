@@ -57,12 +57,6 @@ const DOC_RULES = [
       "Hold update, rollback, and restart-recovery changes to docs/internals/07_server-updates.md.",
   },
   {
-    files: "docs/internals/08_product-analytics.md",
-    applyTo: "{apps/server/src/telemetry,apps/server/src/feedback}/**/*.ts",
-    instructions:
-      "Hold analytics identity, attribution, and privacy boundaries to docs/internals/08_product-analytics.md.",
-  },
-  {
     files: "docs/internals/09_connection-runtime.md",
     applyTo: "packages/client-runtime/src/**/*.ts",
     instructions:
