@@ -1,4 +1,4 @@
-import { useAuth } from "@clerk/react";
+import { cloudAuth } from "../../cloud/managedAuth";
 import { useAtomValue } from "@effect/atom-react";
 import { managedCapabilityDenial } from "@t3tools/client-runtime/contract-labels";
 import {
@@ -36,10 +36,7 @@ import {
   useEnvironmentCanConfigureRelay,
   useEnvironmentScope,
 } from "~/state/session";
-import {
-  type T3ConnectAccountPageUrl,
-  useT3ConnectAccountPage,
-} from "../clerk/T3ConnectAccountPages";
+import { type T3ConnectAccountPageUrl, t3ConnectAccountPage } from "../clerk/T3ConnectAccountPages";
 import { CloudEnvironmentConnectRows } from "./CloudEnvironmentConnectList";
 import { TunnelLimitAlert } from "./TunnelUsage";
 import { Button } from "../ui/button";
@@ -70,7 +67,7 @@ function canPublishOnEnvironment(id: EnvironmentId | null): boolean {
 
 function ConfiguredConnectOnboardingDialog() {
   // Pending Clerk sessions must not look signed out or activation would look like a new sign-in.
-  const { isLoaded, isSignedIn, userId } = useAuth({ treatPendingAsSignedOut: false });
+  const { isLoaded, isSignedIn, userId } = cloudAuth({ treatPendingAsSignedOut: false });
   const gt = useGT();
   const m = useMessages();
   const [optOutState, setOptOutState] = useLocalStorage(
@@ -104,7 +101,7 @@ function ConfiguredConnectOnboardingDialog() {
     primaryEnvironmentId === null ? environmentsReady : primarySessionState._tag !== "Initial";
 
   const controller = useCloudLinkController(primaryEnvironmentId);
-  const accountPage = useT3ConnectAccountPage();
+  const accountPage = t3ConnectAccountPage();
   const showPublishStep = canManageRelay && controller.linkState.target !== null;
   const steps: ReadonlyArray<OnboardingStep> = showPublishStep
     ? ["publish", "devices"]

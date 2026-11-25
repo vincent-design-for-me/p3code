@@ -3,13 +3,17 @@ import * as Option from "effect/Option";
 import * as Schema from "effect/Schema";
 
 import { DEFAULT_HOSTED_APP_URL } from "./connectAuth.ts";
+import { promptLinkDeepLink } from "./promptLinks.ts";
 
 export const THREAD_LINK_PROTOCOL = "t3-thread";
 const V1_PREFIX = `${THREAD_LINK_PROTOCOL}://v1/`;
 const V2_PREFIX = `${THREAD_LINK_PROTOCOL}://v2/`;
 const HOSTED_PREFIX = `${DEFAULT_HOSTED_APP_URL}/threads/`;
+// Derived from the deep link builder, so renaming the app scheme changes it in one place.
+const APP_THREAD_PREFIX = promptLinkDeepLink("/");
 const HOSTED_SEGMENT = "[A-Za-z0-9_%-]+";
-const HOSTED_LINK = `${HOSTED_PREFIX.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&")}${HOSTED_SEGMENT}/${HOSTED_SEGMENT}`;
+const escapeRegExp = (value: string) => value.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+const HOSTED_LINK = `(?:${escapeRegExp(HOSTED_PREFIX)}|${escapeRegExp(APP_THREAD_PREFIX)})${HOSTED_SEGMENT}/${HOSTED_SEGMENT}`;
 const THREAD_HREF = String.raw`t3-thread:\/\/v[12]\/`;
 // A label stops at any bracket, so a run of unclosed brackets is scanned once, not once per bracket.
 const LABEL = String.raw`[^[\]\n]*`;
@@ -46,16 +50,19 @@ const hostedSegment = (id: string) =>
     (character) => `%${character.charCodeAt(0).toString(16).toUpperCase()}`,
   );
 
-/** Opens the thread from anywhere: the hosted app offers the desktop app, the mobile app, or itself. */
-export function hostedThreadLink(ref: ScopedThreadRef, origin = DEFAULT_HOSTED_APP_URL): string {
-  const path = `/threads/${hostedSegment(ref.environmentId)}/${hostedSegment(ref.threadId)}`;
-  return new URL(path, origin).toString();
+/**
+ * Opens the thread through `origin`, a hosted app this build configures. Without one it is the
+ * app's deep link, so a copied link never points at the upstream hosted app.
+ */
+export function hostedThreadLink(ref: ScopedThreadRef, origin?: string | null): string {
+  const appPath = `/${hostedSegment(ref.environmentId)}/${hostedSegment(ref.threadId)}`;
+  return origin ? new URL(`/threads${appPath}`, origin).toString() : promptLinkDeepLink(appPath);
 }
 
 const HOSTED_PATH = new RegExp(`^(${HOSTED_SEGMENT})/(${HOSTED_SEGMENT})$`);
 
-function parseHostedThreadLink(href: string): ThreadLink | null {
-  const match = HOSTED_PATH.exec(href.slice(HOSTED_PREFIX.length));
+function parseHostedThreadLink(href: string, prefix: string): ThreadLink | null {
+  const match = HOSTED_PATH.exec(href.slice(prefix.length));
   if (!match) return null;
   try {
     const environmentId = Option.getOrNull(decodeEnvironmentId(decodeURIComponent(match[1]!)));
@@ -71,7 +78,8 @@ function parseHostedThreadLink(href: string): ThreadLink | null {
  * except in a hosted link, which escapes them itself.
  */
 export function parseThreadLinkHref(href: string): ThreadLink | null {
-  if (href.startsWith(HOSTED_PREFIX)) return parseHostedThreadLink(href);
+  if (href.startsWith(HOSTED_PREFIX)) return parseHostedThreadLink(href, HOSTED_PREFIX);
+  if (href.startsWith(APP_THREAD_PREFIX)) return parseHostedThreadLink(href, APP_THREAD_PREFIX);
   if (href.startsWith(V1_PREFIX)) {
     const threadId = Option.getOrNull(decodeThreadId(href.slice(V1_PREFIX.length)));
     return threadId === null ? null : { environmentId: null, threadId };
@@ -148,7 +156,7 @@ export function formatThreadLink(ref: ThreadLink, label?: string): string {
 export function formatHostedThreadLink(
   ref: ScopedThreadRef,
   label: string,
-  origin?: string,
+  origin?: string | null,
 ): string {
   const href = hostedThreadLink(ref, origin);
   const cleaned = linkLabel(label);
@@ -156,7 +164,11 @@ export function formatHostedThreadLink(
 }
 
 export function hasThreadLinks(markdown: string): boolean {
-  return markdown.includes(`${THREAD_LINK_PROTOCOL}://v`) || markdown.includes(HOSTED_PREFIX);
+  return (
+    markdown.includes(`${THREAD_LINK_PROTOCOL}://v`) ||
+    markdown.includes(HOSTED_PREFIX) ||
+    markdown.includes(APP_THREAD_PREFIX)
+  );
 }
 
 /** Every thread the markdown's links can name, so their titles are keyed reads. */

@@ -1,8 +1,11 @@
 import { afterEach, describe, expect, it, vi } from "vite-plus/test";
 
 import {
+  buildHostedChannelSelectionUrl,
   buildHostedPairingUrl,
+  configuredHostedAppUrl,
   hasHostedPairingRequest,
+  isHostedStaticApp,
   readHostedPairingRequest,
 } from "./hostedPairing";
 
@@ -25,13 +28,13 @@ describe("hostedPairing", () => {
   it("prefers hash tokens so generated hosted links do not put credentials in search params", () => {
     vi.stubEnv("VITE_HOSTED_APP_URL", "https://preview.t3.codes");
 
-    const url = new URL(
-      buildHostedPairingUrl({
-        host: "https://backend.example.com:3773",
-        token: "pairing-token",
-        label: "Workstation",
-      }),
-    );
+    const built = buildHostedPairingUrl({
+      host: "https://backend.example.com:3773",
+      token: "pairing-token",
+      label: "Workstation",
+    });
+    expect(built).not.toBeNull();
+    const url = new URL(built ?? "");
 
     expect(url.origin).toBe("https://preview.t3.codes");
     expect(url.pathname).toBe("/pair");
@@ -39,5 +42,17 @@ describe("hostedPairing", () => {
     expect(url.searchParams.get("label")).toBe("Workstation");
     expect(url.searchParams.has("token")).toBe(false);
     expect(url.hash).toBe("#token=pairing-token");
+  });
+
+  it("builds no hosted links and is never the hosted app when this build configures none", () => {
+    vi.stubEnv("VITE_HOSTED_APP_URL", "");
+    vi.stubEnv("VITE_HOSTED_APP_CHANNEL", "latest");
+
+    expect(configuredHostedAppUrl()).toBeNull();
+    expect(
+      buildHostedPairingUrl({ host: "https://backend.example.com:3773", token: "pairing-token" }),
+    ).toBeNull();
+    expect(buildHostedChannelSelectionUrl({ channel: "nightly" })).toBeNull();
+    expect(isHostedStaticApp(new URL("https://app.t3.codes/pair"))).toBe(false);
   });
 });

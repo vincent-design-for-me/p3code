@@ -66,6 +66,13 @@ export const hostedAppUrlConfig = makePublicValueConfig(
   DEFAULT_HOSTED_APP_URL,
 ).pipe(Config.mapEffect(validateHostedAppUrl));
 
+/** A hosted web app this fork's links may point at; none unless T3CODE_HOSTED_APP_URL names one. */
+export const configuredHostedAppUrlConfig = Config.NonEmptyString("T3CODE_HOSTED_APP_URL").pipe(
+  Config.map((value) => value.trim()),
+  Config.mapEffect(validateHostedAppUrl),
+  Config.option,
+);
+
 const NIGHTLY_HOSTED_APP_URL = "https://nightly.app.t3.codes";
 
 /**

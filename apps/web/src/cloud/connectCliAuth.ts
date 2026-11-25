@@ -1,48 +1,17 @@
-import {
-  buildConnectClerkAuthorizeUrl,
-  connectLoopbackRedirectUri,
-  CONNECT_OAUTH_SCOPES,
-  type ConnectAuthorizeRequest,
-} from "@t3tools/shared/connectAuth";
-import { clerkFrontendApiUrlFromPublishableKey } from "@t3tools/shared/relayAuth";
+import type { ConnectAuthorizeRequest } from "@t3tools/shared/connectAuth";
 
-import { isHostedStaticApp } from "../hostedPairing";
-import { hasCloudPublicConfig, resolveCloudPublicConfig, trimNonEmpty } from "./publicConfig";
-
-function resolveConnectCliOAuthClientId(): string | null {
-  return trimNonEmpty(import.meta.env.VITE_CLERK_CLI_OAUTH_CLIENT_ID as string | undefined);
-}
-
-function hasConnectCliAuthConfig(): boolean {
-  return Boolean(
-    resolveCloudPublicConfig().clerkPublishableKey && resolveConnectCliOAuthClientId(),
-  );
-}
-
+// T3 Connect sign-in was removed with Clerk, so the hosted CLI sign-in route never opens.
 export function connectCliAuthRoutesEnabled(): boolean {
-  return isHostedStaticApp() && hasCloudPublicConfig() && hasConnectCliAuthConfig();
+  return false;
 }
 
-export function buildConnectCliClerkAuthorizeUrl(request: ConnectAuthorizeRequest): string | null {
-  const { clerkPublishableKey } = resolveCloudPublicConfig();
-  const clientId = resolveConnectCliOAuthClientId();
-  if (!clerkPublishableKey || !clientId) {
-    return null;
-  }
-  return buildConnectClerkAuthorizeUrl({
-    authorizationEndpoint: `${clerkFrontendApiUrlFromPublishableKey(clerkPublishableKey)}/oauth/authorize`,
-    clientId,
-    redirectUri: connectLoopbackRedirectUri(request.loopbackPort),
-    scopes: CONNECT_OAUTH_SCOPES,
-    state: request.state,
-    challenge: request.challenge,
-  });
+export function buildConnectCliClerkAuthorizeUrl(_request: ConnectAuthorizeRequest): string | null {
+  return null;
 }
 
-/** Force a new document: fragment revisits do not reload, and Clerk suppresses post-sign-in session updates. */
 export function connectCliSignInRedirectUrl(
-  request: ConnectAuthorizeRequest,
+  _request: ConnectAuthorizeRequest,
   currentHref: string,
 ): string {
-  return buildConnectCliClerkAuthorizeUrl(request) ?? currentHref;
+  return currentHref;
 }

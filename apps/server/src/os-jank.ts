@@ -252,7 +252,8 @@ export const expandHomePath = Effect.fn(function* (input: string) {
 export const resolveBaseDir = Effect.fn(function* (raw: string | undefined) {
   const { join, resolve } = yield* Path.Path;
   if (!raw || raw.trim().length === 0) {
-    return join(yield* HostProcess.HomeDirectory, ".t3");
+    // Separate from the official T3 Code (~/.t3): the two must never share a database.
+    return join(yield* HostProcess.HomeDirectory, ".p3");
   }
   return resolve(yield* expandHomePath(raw.trim()));
 });

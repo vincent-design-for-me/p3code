@@ -100,8 +100,11 @@ describe("link round trips", () => {
       provider: "claudeAgent",
       model: "opus",
     });
+    // No hosted app by default: the link opens the installed app, so the prompt never leaves it.
+    expect(link.startsWith("p3code://new?")).toBe(true);
+    expect(link).not.toContain("app.t3.codes");
     const path = promptLinkAppPath(link);
-    expect(path).toBe(new URL(link).pathname + new URL(link).search);
+    expect(path).toBe(`/new${new URL(link).search}`);
     const parsed = parseNewThreadLink(new URL(link).search);
     expect(parsed.ok && parsed.value.kind === "new" && parsed.value.prompt.text).toBe(
       "Swear count & rating?",
@@ -116,7 +119,7 @@ describe("link round trips", () => {
     const path = promptLinkAppPath(link);
     expect(path).toBe("/env-1/mcp%3A1");
     const deepLink = promptLinkDeepLink(path!);
-    expect(deepLink).toBe("t3code://threads/env-1/mcp%3A1");
+    expect(deepLink).toBe("p3code://threads/env-1/mcp%3A1");
     expect(promptLinkAppPath(deepLink)).toBe(path);
   });
 

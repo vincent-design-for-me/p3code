@@ -50,9 +50,9 @@ export function resolveCloudPublicConfig(extra: ExpoExtra = Constants.expoConfig
   } satisfies CloudPublicConfig;
 }
 
+/** T3 Connect needs Clerk sign-in, which this build does not include, so it is never configured. */
 export function hasCloudPublicConfig(): boolean {
-  const config = resolveCloudPublicConfig();
-  return Boolean(config.clerk.publishableKey && config.clerk.jwtTemplate && config.relay.url);
+  return false;
 }
 
 export function resolveRelayClerkTokenOptions() {

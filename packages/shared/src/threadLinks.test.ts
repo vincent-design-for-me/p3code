@@ -216,7 +216,7 @@ describe("thread links", () => {
 describe("hosted thread links", () => {
   it("escapes every id character a sentence or path could claim, and reads it back", () => {
     const thread = ref("env.1", "thread:delegated/mcp%3A1.");
-    const link = hostedThreadLink(thread);
+    const link = hostedThreadLink(thread, "https://app.t3.codes");
     expect(link).toBe("https://app.t3.codes/threads/env%2E1/thread%3Adelegated%2Fmcp%253A1%2E");
     expect(parseThreadLinkHref(link)).toEqual(thread);
     expect(hostedThreadLink(thread, "https://preview.t3.codes/")).toMatch(
@@ -236,10 +236,25 @@ describe("hosted thread links", () => {
   });
 
   it("writes a copied link a reader can follow, labeled when it has a title", () => {
-    expect(formatHostedThreadLink(ref("e", "t1"), "Fix [ci]")).toBe(
-      "[Fix ci](https://app.t3.codes/threads/e/t1)",
+    expect(formatHostedThreadLink(ref("e", "t1"), "Fix [ci]", "https://hosted.example")).toBe(
+      "[Fix ci](https://hosted.example/threads/e/t1)",
     );
-    expect(formatHostedThreadLink(ref("e", "t1"), " ")).toBe("https://app.t3.codes/threads/e/t1");
+    expect(formatHostedThreadLink(ref("e", "t1"), " ", "https://hosted.example")).toBe(
+      "https://hosted.example/threads/e/t1",
+    );
+  });
+
+  it("falls back to the app's deep link, never the upstream hosted app, without a hosted app", () => {
+    const thread = ref("env.1", "thread:delegated/mcp%3A1.");
+    expect(hostedThreadLink(thread)).toBe(
+      "p3code://threads/env%2E1/thread%3Adelegated%2Fmcp%253A1%2E",
+    );
+    expect(hostedThreadLink(thread, null)).toBe(hostedThreadLink(thread));
+    expect(parseThreadLinkHref(hostedThreadLink(thread))).toEqual(thread);
+    expect(formatHostedThreadLink(ref("e", "t1"), "Fix [ci]")).toBe(
+      "[Fix ci](p3code://threads/e/t1)",
+    );
+    expect(formatHostedThreadLink(ref("e", "t1"), "Fix")).not.toContain("app.t3.codes");
   });
 
   it("titles hosted links in every Markdown form and writes them as v2 links", () => {

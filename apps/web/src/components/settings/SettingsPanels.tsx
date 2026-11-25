@@ -53,7 +53,11 @@ import {
 import { ProviderModelPicker } from "../chat/ProviderModelPicker";
 import { TraitsPicker } from "../chat/TraitsPicker";
 import { isElectron } from "../../env";
-import { buildHostedChannelSelectionUrl, type HostedAppChannel } from "../../hostedPairing";
+import {
+  buildHostedChannelSelectionUrl,
+  configuredHostedAppUrl,
+  type HostedAppChannel,
+} from "../../hostedPairing";
 import {
   readAppearanceModePreference,
   readThemeHalves,
@@ -197,7 +201,9 @@ function AboutVersionSection() {
     hasDesktopBridge && primaryPolicy?.limits?.updates?.allowNightly === false
       ? primaryPolicy.organization
       : undefined;
-  const selectedHostedAppChannel = hasDesktopBridge ? null : HOSTED_APP_CHANNEL;
+  // The channel switch reloads through this build's own hosted app, so it needs one configured.
+  const selectedHostedAppChannel =
+    hasDesktopBridge || configuredHostedAppUrl() === null ? null : HOSTED_APP_CHANNEL;
   // A switch that failed part way leaves this app or a server on the other track.
   // With its updater off, a switch cannot move this app, so it is not counted.
   const appOffTrack =
@@ -449,9 +455,8 @@ function AboutVersionSection() {
               value={selectedHostedAppChannel}
               onValueChange={(value) => {
                 if (value === selectedHostedAppChannel) return;
-                window.location.assign(
-                  buildHostedChannelSelectionUrl({ channel: value as HostedAppChannel }),
-                );
+                const url = buildHostedChannelSelectionUrl({ channel: value as HostedAppChannel });
+                if (url !== null) window.location.assign(url);
               }}
             >
               <SelectTrigger size="sm" className="w-full sm:w-40" aria-label={gt("Update track")}>

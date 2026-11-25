@@ -1,4 +1,4 @@
-import { useAuth, useClerk } from "@clerk/react";
+import { cloudAuth, cloudClient } from "../../cloud/managedAuth";
 import { readConnectAuthorizeRequest } from "@t3tools/shared/connectAuth";
 import { msg, T, useGT, useMessages } from "gt-react";
 import { useEffect, useEffectEvent, useRef, useState } from "react";
@@ -10,7 +10,7 @@ import {
 import { isElectron } from "../../env";
 import { StandalonePage, StandalonePageHeader } from "../ui/standalone-page";
 import { resolveClerkSignInProps } from "../clerk/authRedirect";
-import { retryClerkLoad, useClerkLoadFailed } from "../clerk/clerkLoadFailure";
+import { retryClerkLoad, clerkLoadFailed } from "../clerk/clerkLoadFailure";
 import { Button } from "../ui/button";
 
 const invalidLinkMessage = {
@@ -25,9 +25,9 @@ export function ConnectCliAuthorizeSurface() {
   const [request] = useState(() => readConnectAuthorizeRequest(new URL(window.location.href)));
   const gt = useGT();
   const m = useMessages();
-  const clerk = useClerk();
-  const { isLoaded, isSignedIn } = useAuth();
-  const loadFailed = useClerkLoadFailed();
+  const clerk = cloudClient();
+  const { isLoaded, isSignedIn } = cloudAuth();
+  const loadFailed = clerkLoadFailed();
   const signInOpened = useRef(false);
   const redirecting = useRef(false);
 

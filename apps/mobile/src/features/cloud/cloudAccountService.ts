@@ -1,5 +1,5 @@
-import type { getClerkInstance } from "@clerk/expo";
 import {
+  type CloudAccountSource,
   createCloudAccountService,
   ManagedRelay,
   setManagedRelaySession,
@@ -27,7 +27,12 @@ import { removeCloudEnvironments } from "./cloud-drafts";
 import { clearConnectOnboardingRequest, requestConnectOnboarding } from "./connectOnboarding";
 import { resolveRelayClerkTokenOptions } from "./publicConfig";
 
-type ClerkInstance = ReturnType<typeof getClerkInstance>;
+// The account source a cloud sign-in provider would attach; this build has none.
+interface ClerkInstance extends CloudAccountSource {
+  readonly session?: {
+    readonly getToken: (options?: unknown) => Promise<string | null>;
+  } | null;
+}
 
 export function deactivateCloudRelayAccount(): void {
   setAgentAwarenessRelayTokenProvider(null);

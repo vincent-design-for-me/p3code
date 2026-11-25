@@ -14,6 +14,14 @@ import {
   resolveClaudeHomePath,
 } from "./ClaudeHome.ts";
 
+const TELEMETRY_OPT_OUTS = {
+  DO_NOT_TRACK: "1",
+  DISABLE_TELEMETRY: "1",
+  DISABLE_ERROR_REPORTING: "1",
+  CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC: "1",
+  OPENCODE_DISABLE_TELEMETRY: "1",
+};
+
 it.layer(NodeServices.layer)("ClaudeHome", (it) => {
   describe("Claude home resolution", () => {
     it.effect("resolves configured Claude HOME and stamps continuation/cache keys with it", () =>
@@ -101,10 +109,12 @@ it.layer(NodeServices.layer)("ClaudeHome", (it) => {
         ];
 
         expect(yield* mergeClaudeProcessEnvironment({ homePath }, undefined, host)).toEqual({
+          ...TELEMETRY_OPT_OUTS,
           CLAUDE_CODE_ENTRYPOINT: "t3-code",
           KEEP: "1",
         });
         expect(yield* mergeClaudeProcessEnvironment({ homePath }, instance, host)).toEqual({
+          ...TELEMETRY_OPT_OUTS,
           CLAUDE_CODE_ENTRYPOINT: "instance",
           CLAUDE_EFFORT: "low",
           KEEP: "1",

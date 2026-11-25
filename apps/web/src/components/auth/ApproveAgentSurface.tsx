@@ -1,4 +1,4 @@
-import { useAuth, useClerk } from "@clerk/react";
+import { cloudAuth, cloudClient } from "../../cloud/managedAuth";
 import { useAtomValue } from "@effect/atom-react";
 import { managedRelaySessionAtom } from "@t3tools/client-runtime/relay";
 import {
@@ -16,7 +16,7 @@ import { m } from "../../i18n/messages";
 import { isElectron } from "../../env";
 import { runConnectMcpApproval } from "../../state/connectMcpApproval";
 import { resolveClerkSignInProps } from "../clerk/authRedirect";
-import { retryClerkLoad, useClerkLoadFailed } from "../clerk/clerkLoadFailure";
+import { retryClerkLoad, clerkLoadFailed } from "../clerk/clerkLoadFailure";
 import { Button } from "../ui/button";
 import { Spinner } from "../ui/spinner";
 import { StandalonePage, StandalonePageHeader } from "../ui/standalone-page";
@@ -89,9 +89,9 @@ export function ApproveAgentSurface() {
   const [transport] = useState(() =>
     environmentId === null ? null : connectTransport(environmentId, setEnvironment),
   );
-  const clerk = useClerk();
-  const { isLoaded, isSignedIn } = useAuth();
-  const loadFailed = useClerkLoadFailed();
+  const clerk = cloudClient();
+  const { isLoaded, isSignedIn } = cloudAuth();
+  const loadFailed = clerkLoadFailed();
   const session = useAtomValue(managedRelaySessionAtom);
   const signInOpened = useRef(false);
 

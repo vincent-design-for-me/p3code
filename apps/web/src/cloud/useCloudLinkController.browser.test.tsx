@@ -47,9 +47,9 @@ vi.mock(import("@effect/atom-react"), async (original) => ({
     ),
   })) as never,
 }));
-vi.mock(import("@clerk/react"), async (original) => ({
+vi.mock(import("./managedAuth"), async (original) => ({
   ...(await original()),
-  useAuth: (() => ({ getToken: testState.getToken, isSignedIn: true })) as never,
+  cloudAuth: (() => ({ getToken: testState.getToken, isSignedIn: true })) as never,
 }));
 vi.mock(import("../components/ui/toast"), async (original) => {
   const actual = await original();

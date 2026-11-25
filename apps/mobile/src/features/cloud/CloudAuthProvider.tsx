@@ -1,32 +1,34 @@
-import { ClerkProvider, getClerkInstance } from "@clerk/expo";
-import { tokenCache } from "@clerk/expo/token-cache";
 import type { ReactNode } from "react";
 
-import { cloudAccountService, deactivateCloudRelayAccount } from "./cloudAccountService";
-import { resolveCloudPublicConfig } from "./publicConfig";
+import { deactivateCloudRelayAccount } from "./cloudAccountService";
 
-const cloudConfig = resolveCloudPublicConfig();
-// Build-time constant: null when this build has no cloud config.
-const publishableKey = cloudConfig.relay.url ? cloudConfig.clerk.publishableKey : null;
+// This build has no Clerk, so no cloud account can ever activate. Drop anything a
+// previous build with cloud enabled left registered.
+deactivateCloudRelayAccount();
 
-if (publishableKey) {
-  // The same native singleton ClerkProvider renders with, so the service
-  // observes it for the app's lifetime without a React subscription.
-  cloudAccountService.attach(getClerkInstance({ publishableKey }));
-} else {
-  // Without cloud config no account can ever activate, so drop anything a
-  // previous build with cloud enabled left registered.
-  deactivateCloudRelayAccount();
+/** Cloud sign-in is unavailable in this build: always loaded and signed out. */
+export function cloudAuth(_options?: { readonly treatPendingAsSignedOut?: boolean }) {
+  return {
+    isLoaded: true as const,
+    isSignedIn: false as const,
+    userId: null as string | null,
+    getToken: async (_options?: unknown): Promise<string | null> => null,
+  };
+}
+
+export function cloudUser() {
+  return {
+    isLoaded: true as const,
+    isSignedIn: false as const,
+    user: null as {
+      readonly primaryEmailAddress?: { readonly emailAddress?: string } | null;
+      readonly fullName?: string | null;
+      readonly username?: string | null;
+      readonly imageUrl?: string | null;
+    } | null,
+  };
 }
 
 export function CloudAuthProvider(props: { readonly children: ReactNode }) {
-  if (!publishableKey) {
-    return props.children;
-  }
-
-  return (
-    <ClerkProvider publishableKey={publishableKey} tokenCache={tokenCache}>
-      {props.children}
-    </ClerkProvider>
-  );
+  return props.children;
 }
