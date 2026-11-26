@@ -1,0 +1,49 @@
+/* Matches the sidebar header art's box so meteors fall across the same banner. */
+[data-p3-meteor-shower] {
+  position: absolute;
+  inset: 0 0 auto;
+  z-index: 0;
+  height: 5rem;
+  overflow: hidden;
+  pointer-events: none;
+  mask-image: linear-gradient(to bottom, #000 55%, transparent);
+}
+
+/* Only transform and opacity animate, so the compositor draws the shower without repainting. */
+[data-p3-meteor] {
+  position: absolute;
+  top: -0.75rem;
+  left: var(--p3-meteor-x);
+  width: 3.5rem;
+  height: 1.5px;
+  border-radius: 9999px;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.95));
+  box-shadow: 0 0 6px rgb(186 222 255 / 0.55);
+  opacity: 0;
+  transform-origin: 0 50%;
+  will-change: transform, opacity;
+  animation: p3-meteor-fall var(--p3-meteor-fall) linear var(--p3-meteor-delay) infinite;
+}
+
+@keyframes p3-meteor-fall {
+  0% {
+    opacity: 0;
+    transform: translate(0, 0) rotate(140deg);
+  }
+  12% {
+    opacity: 1;
+  }
+  70% {
+    opacity: 0.85;
+  }
+  100% {
+    opacity: 0;
+    transform: translate(-7.5rem, 6.25rem) rotate(140deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-p3-meteor-shower] {
+    display: none;
+  }
+}
