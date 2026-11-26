@@ -27,6 +27,21 @@ Codex, Cursor, OpenCode, Grok Build, Antigravity, Kiro, Pi, Muse Code, fx, and a
 
 [Network calls](./docs/user/network-calls.md) lists everything that can still leave your machine.
 
+## Install on macOS
+
+Download the latest `P3-Code-*-arm64.dmg` (Apple Silicon) from
+[Releases](https://github.com/vincent-design-for-me/p3code/releases), open it, and drag
+**P3 Code** to Applications.
+
+The app is not signed with an Apple Developer ID, so macOS may say it "is damaged and can't be
+opened" the first time. Clear the download quarantine once, then open it as usual:
+
+```sh
+xattr -dr com.apple.quarantine "/Applications/P3 Code.app"
+```
+
+P3 Code does not update itself. Download a newer release, or build from source, to update.
+
 ## Build from source
 
 ```sh
