@@ -24,13 +24,10 @@ import { cn } from "~/lib/utils";
 import { resolveComposerTraitsInput } from "./composerProviderState";
 import { useApplyThreadModelPick } from "./useApplyThreadModelPick";
 import { useStableCallback } from "../../hooks/useStableCallback";
-import {
-  ComposerEffortColumn,
-  ComposerPickerFooter,
-  describeComposerEffort,
-} from "./ComposerModelEffort";
+import { ComposerPickerFooter, describeComposerEffort } from "./ComposerModelEffort";
 import type { useComposerProviderModel } from "./useComposerProviderModel";
 import { resolveComposerControlsOwnership } from "./composerControlsOwnership";
+import { CompactPickerEffort } from "../p3/modelPicker/CompactPickerEffort";
 
 /**
  * The composer footer controls: the model picker (which also holds effort, speed and
@@ -224,7 +221,8 @@ export function ComposerControlsBar(props: {
       triggerShortcuts={
         pickerOwnsModeShortcut ? "composer.effort composer.mode" : "composer.effort"
       }
-      effortColumn={<ComposerEffortColumn traits={traitsInput} />}
+      compactLayout
+      effortColumn={<CompactPickerEffort traits={traitsInput} />}
       footer={
         <ComposerPickerFooter
           traits={traitsInput}

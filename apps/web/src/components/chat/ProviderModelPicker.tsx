@@ -33,6 +33,7 @@ import { takeOpenTarget, useComposerMenuProps } from "./composerEventScope";
 import { shortcutLabelForCommand } from "../../keybindings";
 import { serverEnvironment } from "../../state/server";
 import { useAtomCommand } from "../../state/use-atom-command";
+import { CompactPickerStack } from "../p3/modelPicker/CompactModelPicker";
 
 /** Holds the page still behind the open picker; its lifetime is the popup element's. */
 function lockBackgroundScroll(popup: HTMLElement | null) {
@@ -128,6 +129,8 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
    */
   effortColumn?: ReactNode;
   footer?: ReactNode;
+  /** With `effortColumn`: one narrow column, provider tabs on top and the effort under the list. */
+  compactLayout?: boolean;
 }) {
   const composerFloatingLayerProps = useComposerMenuProps();
   const [uncontrolledIsMenuOpen, setUncontrolledIsMenuOpen] = useState(false);
@@ -156,6 +159,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
   const isCoarsePointer = useMediaQuery({ pointer: "coarse" });
   const size = props.size ?? "sm";
   const docked = props.effortColumn !== undefined;
+  const compact = docked && props.compactLayout === true;
 
   const activeEntry =
     props.instanceEntries.find((entry) => entry.instanceId === props.activeInstanceId) ?? null;
@@ -322,6 +326,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
       {...(docked
         ? {
             docked,
+            compact,
             onFocusEffort: () => void focusEffort("any"),
             // Inside the fixed height, so switching to or from a ChatGPT plan never resizes it.
             ...(props.selectedModels === undefined
@@ -469,7 +474,7 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
         padding="none"
         touchBackdrop
       >
-        {props.effortColumn ? (
+        {props.effortColumn && !compact ? (
           <DockedPickerContext value={{ modelLabel: triggerTitle }}>
             <div className="flex max-h-(--available-height) flex-col">
               {/* One fixed height, so a model with more options never resizes the popup. Short
@@ -493,6 +498,14 @@ export const ProviderModelPicker = memo(function ProviderModelPicker(props: {
               {props.footer}
             </div>
           </DockedPickerContext>
+        ) : compact ? (
+          <CompactPickerStack
+            effort={props.effortColumn}
+            footer={props.footer}
+            onLeaveEffort={() => searchInputRef.current?.focus()}
+          >
+            {picker}
+          </CompactPickerStack>
         ) : (
           picker
         )}

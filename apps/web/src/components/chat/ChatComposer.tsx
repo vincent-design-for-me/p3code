@@ -307,6 +307,10 @@ import { ComposerControlsBar } from "./ComposerControlsBar";
 import { composerCommandKeyHandler } from "./composerCommandKey";
 import { promptSuggestionToAccept, usePromptSuggestion } from "./usePromptSuggestion";
 import { useFreshSessionArmed } from "./freshSessionArms";
+import {
+  ComposerUsageStatus,
+  type ComposerUsageStatusInput,
+} from "../p3/composer/ComposerUsageStatus";
 
 function consumePasteAsTextShortcut(deadline: { current: number }): boolean {
   const armed = Date.now() <= deadline.current;
@@ -409,6 +413,7 @@ export interface ChatComposerProps {
   keepFullHistory: boolean;
   onToggleKeepFullHistory: () => void;
   onUsageLimitsCommand?: (() => void) | undefined;
+  usageStatus?: ComposerUsageStatusInput | undefined;
   sideChatAvailable?: boolean;
   sideChatDisabledReason?: string | null;
   /** Arms a fresh session for the next message; absent where `/clear` is unavailable. */
@@ -4165,6 +4170,17 @@ export const ChatComposer = memo(function ChatComposer(props: ChatComposerProps)
                 </div>
               </div>
             )}
+            {props.usageStatus &&
+            selectedProviderEntry &&
+            multipleModelSelections === null &&
+            !isComposerCollapsedMobile ? (
+              <ComposerUsageStatus
+                {...props.usageStatus}
+                instanceId={selectedInstanceId}
+                model={selectedModel}
+                providers={providerStatuses}
+              />
+            ) : null}
             {showInlineRestingControls ? (
               <div className="h-8">
                 <div

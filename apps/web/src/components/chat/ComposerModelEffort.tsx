@@ -65,7 +65,7 @@ type ColumnControl =
  * The column lists the model's reasoning levels under the header that names it. Other options,
  * such as an agent's session mode, sit below as one row each.
  */
-function columnControls(
+export function columnControls(
   selects: ReadonlyArray<SelectDescriptor>,
   toggles: ReadonlyArray<BooleanDescriptor>,
 ) {
@@ -243,7 +243,7 @@ function ColumnRow(props: {
   );
 }
 
-function moveBetweenRows(event: KeyboardEvent<HTMLElement>) {
+export function moveBetweenRows(event: KeyboardEvent<HTMLElement>) {
   const arrow = event.key === "ArrowDown" || event.key === "ArrowUp";
   if (
     !arrow &&
@@ -273,7 +273,7 @@ function moveBetweenRows(event: KeyboardEvent<HTMLElement>) {
   next.scrollIntoView({ block: "nearest" });
 }
 
-function EffortLevels(props: { traits: TraitsSelectionInput }) {
+export function EffortLevels(props: { traits: TraitsSelectionInput }) {
   const traits = useTraitsSelection(props.traits);
   const { effort, others } = columnControls(traits.selectDescriptors, traits.booleanDescriptors);
   if (traits.modelIsUnavailable) {
@@ -395,7 +395,7 @@ function OptionRowText(props: { label: string; value: string }) {
  * One select besides reasoning, such as an agent's session mode. It names the current choice and
  * opens the rest beside the column, so any number of options leaves the levels in place.
  */
-function OptionMenuRow(props: {
+export function OptionMenuRow(props: {
   descriptor: SelectDescriptor;
   traits: TraitsSelection;
   /** Holds the column's tab stop when the model has no levels. */
@@ -498,7 +498,7 @@ function OptionMenuRow(props: {
 }
 
 /** A two-state option toggles in place; a menu would add a click for nothing. */
-function OptionSwitchRow(props: {
+export function OptionSwitchRow(props: {
   descriptor: BooleanDescriptor;
   traits: TraitsSelection;
   tabStop: boolean;
@@ -526,7 +526,7 @@ function OptionSwitchRow(props: {
   );
 }
 
-function NoEffortRow() {
+export function NoEffortRow() {
   return (
     <div className="flex h-8 items-center px-2 text-muted-foreground text-sm">
       <T>No effort levels</T>

@@ -41,6 +41,7 @@ import {
 } from "../panelAnimations";
 import { BackgroundThreadAnnouncer } from "./BackgroundThreadAnnouncer";
 import { HistorySwipeNavigation } from "./HistorySwipeNavigation";
+import { QuotaRail } from "./p3/quotaRail/QuotaRail";
 import ThreadSidebar from "./Sidebar";
 import { SidebarBrandWidthProbe } from "./sidebar/SidebarChrome";
 import { isAppModalPage } from "./sidebar/mainAppLocation";
@@ -504,6 +505,7 @@ export function AppSidebarLayout({
         <BackgroundThreadAnnouncer />
         <SidebarControl showSidebar={showSidebar} />
         {isElectron ? <HistorySwipeNavigation /> : null}
+        {showSidebar ? <QuotaRail /> : null}
       </SidebarProvider>
     </PanelAnimationSuppressionProvider>
   );

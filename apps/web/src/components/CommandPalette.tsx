@@ -235,6 +235,7 @@ import {
   reduceCommandPaletteSearchState,
   type SearchOverlayMode,
 } from "./CommandPalette.logic";
+import { dailyNotesCommandItem } from "./p3/dailyNotes/dailyNotesCommand";
 import { resolveEnvironmentOptionLabel } from "./BranchToolbar.logic";
 import { CommandPaletteContent, type PendingInputSelection } from "./CommandPaletteContent";
 import {
@@ -1787,6 +1788,7 @@ function OpenCommandPaletteDialog(props: {
       await navigate({ to: "/usage" });
     },
   });
+  actionItems.push(dailyNotesCommandItem(messages, navigate));
 
   for (const direction of [1, -1] as const) {
     const title =

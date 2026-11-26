@@ -75,6 +75,9 @@ import {
 } from "../../providerInstances";
 import { providerModelKey, sortProviderModelItems } from "../../modelOrdering";
 import { hasRuntimeModelCatalog } from "../../providerModels";
+import { COMPACT_PICKER_CONTENT_CLASS } from "../p3/modelPicker/CompactModelPicker";
+import { compactPickerContentStyle } from "../p3/modelPicker/compactPicker.logic";
+import { ModelQuotaBadge } from "../p3/modelPicker/ModelQuotaBadge";
 
 type ModelPickerItem = {
   slug: string;
@@ -370,6 +373,8 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
   onFocusEffort?: () => void;
   /** Closes the list column, inside the popup's fixed height. */
   listFooter?: ReactNode;
+  /** Docked in the narrow column: provider tabs on top, a quota figure on each model. */
+  compact?: boolean;
 }) {
   const gt = useGT();
   const messages = useMessages();
@@ -897,6 +902,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
     modelJumpLabelByKey,
     activeModelKey,
     selectedModelKeySet,
+    ...(props.compact ? { instanceEntries } : {}),
   };
 
   const onWindowKeyDown = (event: globalThis.KeyboardEvent) => {
@@ -963,6 +969,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
         className={cn(
           "relative flex w-screen max-w-90 flex-row overflow-hidden",
           props.docked ? "max-sm:h-56 max-sm:w-full max-sm:max-w-none" : "max-h-86.5",
+          props.compact && COMPACT_PICKER_CONTENT_CLASS,
         )}
         // Docked, the popup sets the height; a minimum here would overflow short windows.
         style={
@@ -974,10 +981,12 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
                   minHeight: `min(calc(var(--spacing) * ${tallestTabUnits + LIST_CHROME_UNITS} + 1px), calc(var(--spacing) * 86.5))`,
                 }
         }
+        {...(props.compact ? { style: compactPickerContentStyle(tallestTabUnits) } : {})}
         data-model-picker-content="true"
       >
         {showSidebar && (
           <ModelPickerSidebar
+            horizontal={props.compact === true}
             selectedInstanceId={selectedInstanceId}
             onSelectInstance={handleSelectInstance}
             onFocusSearch={focusSearchInput}
@@ -1046,7 +1055,7 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
           <div
             className={cn(
               "flex min-h-0 flex-1 flex-col overflow-hidden bg-muted/40",
-              showSidebar && "border-l border-border/70",
+              showSidebar && !props.compact && "border-l border-border/70",
             )}
           >
             <ComboboxSearchInput
@@ -1235,6 +1244,20 @@ export const ModelPickerContent = memo(function ModelPickerContent(props: {
                     unavailable={model.isUnavailable === true}
                     jumpLabel={modelJumpLabelByKey.get(modelKey) ?? null}
                     disabledReason={disabledReason}
+                    {...(props.compact
+                      ? {
+                          trailing: (
+                            <ModelQuotaBadge
+                              provider={
+                                instanceEntries.find(
+                                  (entry) => entry.instanceId === model.instanceId,
+                                )?.snapshot
+                              }
+                              slug={model.slug}
+                            />
+                          ),
+                        }
+                      : {})}
                     onToggleFavorite={toggleFavorite}
                   />
                 );

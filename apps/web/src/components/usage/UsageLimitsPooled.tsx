@@ -18,7 +18,6 @@ import { normalizeProviderAccentColor } from "@t3tools/client-runtime/state/prov
 import { AlertTriangleIcon, ExternalLinkIcon, TicketIcon } from "lucide-react";
 import {
   createContext,
-  Fragment,
   type ReactNode,
   type RefObject,
   use,
@@ -38,6 +37,7 @@ import { Button } from "../ui/button";
 import { OpenAI } from "../Icons";
 import { Alert, AlertTitle } from "../ui/alert";
 import { Popover, PopoverCreateHandle, PopoverPopup, PopoverTrigger } from "../ui/popover";
+import { LimitsCardGrid } from "../p3/limits/LimitsCardGrid";
 import { PaceIcon, ResetCreditDialog, barColor, usePaceMark, useResetCredit } from "./UsageLimits";
 import {
   collectExternalUsageLinks,
@@ -644,6 +644,7 @@ function PoolWindowCard({
   );
 }
 
+// oxlint-disable-next-line eslint/no-unused-vars -- P3: replaced by LimitsCardGrid, kept so upstream merges stay clean
 function PoolSection({ pool, now }: { readonly pool: LimitPool; readonly now: number }) {
   const color = barColor(pool.driver);
   const label = providerClients.get(pool.driver)?.label ?? String(pool.driver);
@@ -705,11 +706,12 @@ export function UsageLimitsPooled({
         </p>
       ) : null}
       <SegmentPopoverContext value={segmentPopover}>
-        {pools.map((pool) => (
-          <Fragment key={pool.driver}>
-            <PoolSection pool={pool} now={now} />
-          </Fragment>
-        ))}
+        <LimitsCardGrid
+          pools={pools}
+          presentations={presentations}
+          now={now}
+          popover={segmentPopover}
+        />
       </SegmentPopoverContext>
       <Popover handle={segmentPopover} actionsRef={segmentPopoverActions}>
         {({ payload }) =>

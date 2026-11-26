@@ -12,6 +12,7 @@ import {
   shouldShowInstanceBadge,
   type ProviderInstanceEntry,
 } from "../../providerInstances";
+import { COMPACT_PICKER_TABS_CLASS } from "../p3/modelPicker/CompactModelPicker";
 
 function describeUnavailableInstance(
   entry: ProviderInstanceEntry,
@@ -56,6 +57,8 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   disabledInstanceIds?: ReadonlySet<ProviderInstanceId>;
   selectableUnavailableInstanceIds?: ReadonlySet<ProviderInstanceId>;
   getDisabledInstanceTooltip?: (entry: ProviderInstanceEntry) => string;
+  /** One row of tabs above the search box; Down moves to the search. */
+  horizontal?: boolean;
 }) {
   const m = useMessages();
   const handleSelect = (instanceId: ProviderInstanceId | "favorites") => {
@@ -88,13 +91,15 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
 
   return (
     <Toolbar.Root
-      className="w-11 shrink-0 overflow-hidden bg-muted/30"
+      className={
+        props.horizontal ? COMPACT_PICKER_TABS_CLASS : "w-11 shrink-0 overflow-hidden bg-muted/30"
+      }
       data-model-picker-sidebar="true"
       aria-label={m(msg("Providers"))}
-      orientation="vertical"
+      orientation={props.horizontal ? "horizontal" : "vertical"}
       onKeyDown={(event) => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-        if (event.key === "ArrowRight") {
+        if (event.key === (props.horizontal ? "ArrowDown" : "ArrowRight")) {
           event.preventDefault();
           props.onFocusSearch();
           return;
@@ -130,7 +135,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                     }
                   />
                   <TooltipPopup
-                    side={PICKER_TOOLTIP_SIDE}
+                    side={props.horizontal ? "top" : PICKER_TOOLTIP_SIDE}
                     sideOffset={PICKER_TOOLTIP_SIDE_OFFSET}
                     align="center"
                   >
@@ -217,7 +222,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                 <Tooltip>
                   <TooltipTrigger render={trigger} />
                   <TooltipPopup
-                    side={PICKER_TOOLTIP_SIDE}
+                    side={props.horizontal ? "top" : PICKER_TOOLTIP_SIDE}
                     sideOffset={PICKER_TOOLTIP_SIDE_OFFSET}
                     align="center"
                   >

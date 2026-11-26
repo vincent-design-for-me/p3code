@@ -1,6 +1,6 @@
 import { type ProviderDriverKind, type ProviderInstanceId } from "@t3tools/contracts";
 import { T, useGT } from "gt-react";
-import { memo } from "react";
+import { memo, type ReactNode } from "react";
 import { CheckIcon, StarIcon } from "lucide-react";
 import { getDisplayModelName } from "./providerIconUtils";
 import { ComboboxItem } from "../ui/combobox";
@@ -33,6 +33,8 @@ export const ModelListRow = memo(function ModelListRow(props: {
   unavailable?: boolean;
   jumpLabel?: string | null;
   disabledReason?: string | null;
+  /** Sits between the name and the favorite star, such as a quota figure. */
+  trailing?: ReactNode;
   onToggleFavorite: (instanceId: ProviderInstanceId, slug: string) => void;
 }) {
   const gt = useGT();
@@ -101,6 +103,7 @@ export const ModelListRow = memo(function ModelListRow(props: {
           </Badge>
         ) : null}
       </div>
+      {props.trailing}
 
       <div className="flex shrink-0 items-center gap-1.5">
         <Tooltip>

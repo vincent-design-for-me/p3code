@@ -109,6 +109,7 @@ import { readLocalApi } from "../localApi";
 import { configuredHostedAppUrl } from "../hostedPairing";
 import { useSidebarPendingFileDropStore } from "../sidebarPendingFileDropStore";
 import { SidebarFolderDrop } from "./sidebar/SidebarFolderDrop";
+import { DailyNotesSidebarEntry } from "./p3/dailyNotes/DailyNotesSidebarEntry";
 import {
   pickableProjectGroups,
   selectProjectGroupingSettings,
@@ -3337,6 +3338,11 @@ export default function Sidebar({ routeReveal }: { routeReveal: SidebarRouteReve
               searchResultCount={threadSearchResults.length}
               activeSearchResultIndex={activeSearchResultIndex}
               onClearSearch={clearThreadSearch}
+            />
+            <DailyNotesSidebarEntry
+              scopedProjectGroups={scopedProjectGroups}
+              projectGroups={projectGroups}
+              routeThreadRef={routeThreadRef}
             />
           </SidebarGroup>
         }

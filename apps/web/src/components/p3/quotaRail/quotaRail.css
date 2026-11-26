@@ -1,0 +1,238 @@
+/* The rail stays in layout so the chat width, and with it the details panel mode, never changes. */
+[data-p3-quota-rail][data-details-open] {
+  visibility: hidden;
+}
+
+[data-p3-quota-rail] {
+  --p3-quota-surface: color-mix(in srgb, var(--foreground) 5.5%, var(--background));
+  flex: 0 0 3.6rem;
+  padding: max(var(--p3-quota-curve), var(--workspace-topbar-height, 2.75rem)) 0
+    var(--p3-quota-curve) 0.3rem;
+}
+
+[data-p3-quota-dock] {
+  position: relative;
+  display: flex;
+  min-height: 0;
+  border-radius: var(--p3-quota-radius) 0 0 var(--p3-quota-radius);
+  background: var(--p3-quota-surface);
+}
+
+/* Concave fillets blend the dock into the window edge above and below it. */
+[data-p3-quota-dock]::before,
+[data-p3-quota-dock]::after {
+  position: absolute;
+  right: 0;
+  width: var(--p3-quota-curve);
+  height: var(--p3-quota-curve);
+  background: radial-gradient(
+    circle at left var(--p3-quota-curve-origin),
+    transparent calc(var(--p3-quota-curve) - 0.5px),
+    var(--p3-quota-surface) var(--p3-quota-curve)
+  );
+  pointer-events: none;
+  content: "";
+}
+
+[data-p3-quota-dock]::before {
+  --p3-quota-curve-origin: top;
+  bottom: 100%;
+}
+
+[data-p3-quota-dock]::after {
+  --p3-quota-curve-origin: bottom;
+  top: 100%;
+}
+
+[data-p3-quota-notch] {
+  position: absolute;
+  left: 0;
+  z-index: 1;
+  overflow: visible;
+  pointer-events: none;
+  fill: none;
+  stroke-linecap: round;
+}
+
+[data-p3-quota-notch-track] {
+  stroke: color-mix(in srgb, var(--foreground) 11%, transparent);
+  stroke-width: 1;
+}
+
+/* Stacked dashes share one head; longer ones are fainter, so the light tapers into a tail.
+   The comet is mounted only while it plays, and it holds its end state past the path's end. */
+[data-p3-quota-comet] path {
+  stroke-width: 1.5;
+  stroke-dasharray: calc(var(--p3-quota-dash) * 1px) 400px;
+  animation: p3-quota-notch-flow 7s linear 1 forwards;
+}
+
+[data-p3-quota-comet] [data-part="tail"] {
+  --p3-quota-dash: 20;
+  opacity: 0.22;
+}
+
+[data-p3-quota-comet] [data-part="body"] {
+  --p3-quota-dash: 11;
+  opacity: 0.45;
+}
+
+[data-p3-quota-comet] [data-part="head"] {
+  --p3-quota-dash: 4;
+}
+
+[data-p3-quota-comet="halo"] {
+  opacity: 0.85;
+  filter: blur(3px);
+}
+
+[data-p3-quota-comet="halo"] path {
+  stroke-width: 4;
+}
+
+@keyframes p3-quota-notch-flow {
+  from {
+    stroke-dashoffset: calc(var(--p3-quota-dash) * 1px);
+  }
+  to {
+    stroke-dashoffset: calc(var(--p3-quota-dash) * 1px - 125px);
+  }
+}
+
+/* The rail's own scrollbar shows only while it scrolls. */
+[data-p3-quota-scroll] {
+  scrollbar-width: thin;
+  scrollbar-color: transparent transparent;
+  transition: scrollbar-color 180ms ease-out;
+}
+
+[data-p3-quota-scroll][data-scrolling] {
+  scrollbar-color: color-mix(in srgb, var(--foreground) 23%, transparent) transparent;
+  transition-duration: 0ms;
+}
+
+[data-p3-quota-button] {
+  border-radius: 0.85rem;
+  padding-block: 0.45rem;
+  font-variant-numeric: tabular-nums;
+}
+
+[data-p3-quota-button]:is(:hover, [data-popup-open]) {
+  border-color: color-mix(in oklab, var(--p3-quota-color) 29%, var(--border));
+  background: color-mix(in oklab, var(--p3-quota-color) 10%, var(--background));
+}
+
+[data-p3-quota-button][data-empty] [data-p3-quota-dial] {
+  opacity: 0.58;
+}
+
+[data-p3-quota-summary] {
+  font-weight: 650;
+}
+
+@property --p3-quota-sheen {
+  syntax: "<number>";
+  inherits: false;
+  initial-value: -0.18;
+}
+
+/* The wrapper carries the halo because a filter on the masked ring would be clipped by its own mask. */
+[data-p3-quota-ring] {
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  filter: drop-shadow(0 0 1.5px color-mix(in srgb, var(--p3-quota-color) 40%, transparent));
+}
+
+/* The sheen is its own layer; every stop is clamped to the remaining arc so it never moves the track. */
+[data-p3-quota-ring]::before {
+  --p3-quota-lit: calc(var(--p3-quota-value) * var(--p3-quota-sheen));
+  --p3-quota-sheen-width: calc(var(--p3-quota-value) * 0.18);
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  background:
+    conic-gradient(
+      transparent 0,
+      transparent
+        clamp(0%, calc(var(--p3-quota-lit) - var(--p3-quota-sheen-width)), var(--p3-quota-value)),
+      color-mix(in srgb, white 72%, transparent)
+        clamp(0%, var(--p3-quota-lit), var(--p3-quota-value)),
+      transparent
+        clamp(0%, calc(var(--p3-quota-lit) + var(--p3-quota-sheen-width)), var(--p3-quota-value)),
+      transparent 100%
+    ),
+    conic-gradient(
+      color-mix(in oklab, var(--p3-quota-color) 60%, white) 0,
+      var(--p3-quota-color) calc(var(--p3-quota-value) * 0.55),
+      color-mix(in oklab, var(--p3-quota-color) 88%, black) var(--p3-quota-value),
+      color-mix(in oklab, var(--foreground) 15%, transparent) var(--p3-quota-value)
+    );
+  mask-image: radial-gradient(
+    farthest-side,
+    transparent calc(100% - 3.5px),
+    #000 calc(100% - 2.5px)
+  );
+  content: "";
+}
+
+/* Plays once when the rail is hovered or focused (cascading down the rail) or when its value changes. */
+[data-p3-quota-rail][data-playing] [data-p3-quota-ring],
+[data-p3-quota-ring][data-flash] {
+  animation: p3-quota-halo 3.2s ease-in-out 2 alternate;
+}
+
+[data-p3-quota-rail][data-playing] [data-p3-quota-ring]::before,
+[data-p3-quota-ring][data-flash]::before {
+  animation: p3-quota-sheen 3.6s ease-in-out 1;
+}
+
+[data-p3-quota-rail][data-playing] [data-p3-quota-ring],
+[data-p3-quota-rail][data-playing] [data-p3-quota-ring]::before {
+  animation-delay: calc(var(--p3-quota-order, 0) * 120ms);
+}
+
+[data-p3-quota-button][data-empty] [data-p3-quota-ring],
+[data-p3-quota-button][data-empty] [data-p3-quota-ring]::before {
+  filter: none;
+  animation: none;
+}
+
+@keyframes p3-quota-halo {
+  to {
+    filter: drop-shadow(0 0 3.5px color-mix(in srgb, var(--p3-quota-color) 75%, transparent));
+  }
+}
+
+@keyframes p3-quota-sheen {
+  0% {
+    --p3-quota-sheen: -0.18;
+  }
+  80%,
+  100% {
+    --p3-quota-sheen: 1.18;
+  }
+}
+
+[data-p3-quota-track] {
+  background: color-mix(in oklab, var(--p3-quota-color) 18%, var(--muted));
+}
+
+[data-p3-quota-window-meta] {
+  font-size: 0.65rem;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-p3-quota-rail] [data-p3-quota-ring],
+  [data-p3-quota-rail] [data-p3-quota-ring]::before {
+    animation: none;
+  }
+
+  [data-p3-quota-comet] {
+    display: none;
+  }
+
+  [data-p3-quota-scroll] {
+    transition: none;
+  }
+}

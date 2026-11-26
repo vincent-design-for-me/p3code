@@ -3877,6 +3877,13 @@ export default function ChatView(props: ChatViewProps) {
                                     ? openUsageLimits
                                     : undefined
                                 }
+                                usageStatus={{
+                                  sources:
+                                    serverConfig?.usageLimitSources ?? EMPTY_USAGE_LIMIT_SOURCES,
+                                  contextWindow: activeContextWindow,
+                                  providerThreadId: activeProviderThread?.id ?? null,
+                                  turns: serverProjection?.providerTurns,
+                                }}
                                 environmentUnavailable={activeEnvironmentUnavailableState}
                                 activePendingApproval={activePendingApproval}
                                 pendingApprovals={pendingApprovals}

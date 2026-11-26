@@ -117,20 +117,16 @@ setting removes it from `settings.json`.
 
 ## Track subscription limits
 
-**Usage → Limits** pools every subscription account it can see per provider, so with several Codex
-or Claude accounts across your enabled environments and hubs you read one number per window rather than a
-list. Each window card shows how much of the pool is left and a bar with one segment per account,
-kept in the same column across windows. Accounts are ordered by their next 5-hour refill, soonest
-first. For an account with no weekly quota left, this is when its session becomes usable again.
-The first available window is used when no account reports a 5-hour limit. A gap means the
-account does not report that window. When the provider reports reset times, the card also says
-when the next reset lands and how much it hands back. The hatched
-part of a segment is what that reset restores. Tap a segment or account row for the account's plan,
-where it is signed in, and its reset time. On web, you can hover too. Codex and Claude accounts
-with banked reset credits show a ticket count and the **Use reset** action in the account details.
-Claude resets are not available when the server runs on macOS, where Claude keeps its login in the
-Keychain. On narrow screens, numbered rows below
-the bar show each account's quota, countdown, and credits. Tap a row to open its details.
+**Usage → Limits** shows every subscription account it can see, grouped by provider. On web and
+desktop each account gets its own card: the dial shows how much of its 5-hour window is left (or
+its weekly window when it has no 5-hour limit), and the rows below show its other windows. The
+mark on each bar is an even pace: if the fill is left of it, you are spending faster than the
+window allows. A provider with several accounts shows when the next refill lands and how much it
+hands back. Tap or hover a window for the account's plan, where it is signed in, and its reset
+time. Codex and Claude accounts with banked reset credits show a count and the **Use reset**
+action in those details. Claude resets are not available when the server runs on macOS, where
+Claude keeps its login in the Keychain. The mobile app pools accounts into one bar per window,
+with a segment per account.
 
 The same account signed in on more than one environment, or reported by a hub as well, counts once.
 Filter with the environment dropdown to see what a single machine has.
@@ -151,11 +147,20 @@ closes when you dismiss it or send your next message. It uses the same snapshot 
 anything. The command is offered only for providers that appear under **Usage → Limits**.
 
 To keep them in view on web and desktop, turn on **Usage limits** in **Settings → Appearance → Thread details**, or right-click the thread details card.
-The bottom of the thread details card then shows how much is left in each limit window of the
-current provider account. Some windows, such as a weekly Opus limit, count only one model. Hover a
-row to see when it resets and your pace. Turn on **Context window** to also show the thread's
+The bottom of the thread details card then shows how much is left in each limit window that the
+current model uses, with when each resets, and lists the account's other windows under **Other
+Models**. Some windows, such as a weekly Opus limit, count only one model. Turn on **Context window** to also show the thread's
 context use against the model's limit. A tick on the bar marks where the provider compacts
 automatically, when it reports that point.
+
+On web and desktop, two more places show limits without opening Usage:
+
+- The strip under the composer shows the thread's context use, the last turn's tokens and cache
+  hits, and what is left of the current model's limits. Click the limits to open **Usage → Limits**.
+- The rail on the right edge of the window has one ring per provider you are signed in to. Hover
+  a ring for its weekly limits, or click it for every account's windows with an estimate of
+  whether the quota lasts until it resets. The estimate assumes you keep spending at the average
+  rate since the window started.
 
 OpenCode Go reports its session, weekly, and monthly allowance when OpenCode runs locally in
 the environment. T3 cannot report limits for external OpenCode servers because their credentials

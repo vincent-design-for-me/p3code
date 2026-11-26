@@ -1,0 +1,48 @@
+/* A 270° gauge: a tick-masked track under a tick-masked sweep of the account's gradient. */
+[data-p3-limits-dial] {
+  --p3-limits-ring: radial-gradient(transparent 59%, #000 60% 68%, transparent 69%);
+  --p3-limits-ticks: repeating-conic-gradient(
+    from 225deg,
+    #000 0deg 2.15deg,
+    transparent 2.15deg 5.625deg
+  );
+  position: relative;
+  isolation: isolate;
+}
+
+[data-p3-limits-dial]::before,
+[data-p3-limits-dial]::after {
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  border-radius: 50%;
+  content: "";
+  pointer-events: none;
+}
+
+[data-p3-limits-dial]::before {
+  background: conic-gradient(
+    from 225deg,
+    color-mix(in oklab, var(--foreground) 16%, transparent) 0deg 270deg,
+    transparent 270deg
+  );
+  mask-image: var(--p3-limits-ring), var(--p3-limits-ticks);
+  mask-composite: intersect;
+}
+
+[data-p3-limits-dial]::after {
+  background: conic-gradient(
+    from 225deg,
+    var(--p3-limits-start),
+    var(--p3-limits-end) 270deg,
+    var(--p3-limits-start)
+  );
+  mask-image:
+    var(--p3-limits-ring), var(--p3-limits-ticks),
+    conic-gradient(
+      from 225deg,
+      #000 0deg var(--p3-limits-sweep),
+      transparent var(--p3-limits-sweep)
+    );
+  mask-composite: intersect;
+}

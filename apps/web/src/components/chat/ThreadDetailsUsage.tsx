@@ -55,7 +55,10 @@ function limitTone(left: number): UsageTone {
   return null;
 }
 
-/** The selected provider's limit windows. Each row reads as room left and opens the usage page. */
+/**
+ * The selected provider's limit windows. Each row reads as room left and opens the usage page.
+ * @public P3 renders ThreadModelQuota instead; kept so upstream merges stay clean.
+ */
 export function ThreadDetailsUsage({
   providerInstanceId,
   model,
