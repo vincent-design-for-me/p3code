@@ -1,12 +1,13 @@
 import { initializeGTSPA } from "gt-react";
 
+import { brandCatalog } from "../components/p3/branding/brandCopy";
 import { DEFAULT_LOCALE, SUPPORTED_LOCALES } from "./locales";
 
 // English is the source text, so it never loads a chunk.
 async function loadTranslations(locale: string): Promise<unknown> {
   if (locale === DEFAULT_LOCALE) return {};
   const module: { default: unknown } = await import(`./translations/${locale}.json`);
-  return module.default;
+  return brandCatalog(module.default);
 }
 
 /** Sets up GT's singletons. `onLocaleRequest` receives GT's own locale changes. */

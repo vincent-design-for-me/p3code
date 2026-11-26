@@ -4,7 +4,7 @@ import * as Schema from "effect/Schema";
 import { compareSemverVersions } from "./semver.ts";
 
 // Runtimes for `t3 service`, `t3 update`, and SSH hosts come from this fork, never the official T3 Code build.
-const CLI_RELEASE_REPOSITORY = "vincent-design-for-me/t3code";
+const CLI_RELEASE_REPOSITORY = "vincent-design-for-me/p3code";
 export const CLI_RELEASES_PAGE_URL = `https://github.com/${CLI_RELEASE_REPOSITORY}/releases`;
 export const CLI_RELEASE_CHECKSUMS_FILE = "SHA256SUMS";
 export const CLI_RELEASE_BASE_URL_ENV = "T3CODE_RELEASE_BASE_URL";

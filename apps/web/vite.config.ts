@@ -21,6 +21,7 @@ import { thirdPartyLicensesPlugin } from "../../scripts/lib/third-party-licenses
 import { tailwindPlugins } from "./vite/tailwind";
 import { warmBundledDevPlugin } from "./vite/warmBundledDev";
 import { formatAppDisplayName, resolveWebAppStageLabel } from "./src/branding.logic";
+import { p3BrandPlugin } from "./src/components/p3/branding/brandVitePlugin";
 
 const repoEnv = loadRepoEnv();
 Object.assign(process.env, repoEnv);
@@ -331,6 +332,7 @@ export default defineConfig(({ command }) => {
               { bundle: "desktop", path: new URL("../desktop/package.json", import.meta.url) },
             ],
           }),
+      p3BrandPlugin(),
       tanstackRouter({ autoCodeSplitting: true }),
       react({ compiler: true }),
       tailwindPlugins(bundledDev),

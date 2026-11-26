@@ -1,3 +1,4 @@
+import { brandBootErrorPage } from "./components/p3/branding/brandBootErrorPage";
 import { showBootError } from "./lib/bootError";
 import { chunkLoadState, handleChunkLoadErrors } from "./lib/chunkReloadGuard";
 
@@ -7,5 +8,7 @@ handleChunkLoadErrors();
 export const boot = import("./main")
   .then(({ startup }) => startup)
   .catch((error: unknown) => {
-    if (!chunkLoadState.reloadScheduled) showBootError(error);
+    if (chunkLoadState.reloadScheduled) return;
+    showBootError(error);
+    brandBootErrorPage();
   });

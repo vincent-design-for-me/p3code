@@ -279,7 +279,8 @@ export const make = Effect.gen(function* () {
       projectOrganization: true,
       ignoredFileListing: true,
       ignoredFileSearch: true,
-      triage: true,
+      // P3 has no triage: its agent files reports into upstream T3 Code's issue tracker.
+      triage: false,
       oneTimeSchedules: true,
       freshContext: true,
       scheduledTaskThreadModes: true,

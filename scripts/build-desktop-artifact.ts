@@ -3767,7 +3767,7 @@ const buildDesktopArtifactUnlocked = Effect.fn("buildDesktopArtifactUnlocked")(f
     description:
       "P3 Code is an unofficial fork of the T3 Code source, an open-source desktop app for coding agents. Work with your existing agent subscriptions, review code changes, and run commands in your projects. Connect from desktop, web, or mobile to continue working remotely.",
     license: "MIT",
-    homepage: "https://github.com/vincent-design-for-me/t3code",
+    homepage: "https://github.com/vincent-design-for-me/p3code",
     author: "P3 Code contributors",
     main: "apps/desktop/dist-electron/boot.cjs",
     build: yield* createBuildConfig(
