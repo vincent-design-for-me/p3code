@@ -146,6 +146,7 @@ import { useThreadFindPositionReader } from "./useThreadFindPositionReader";
 import { ThreadActivityAnnouncer } from "./ThreadActivityAnnouncer";
 import { useStableHandoffRuns, useIncrementalTimelineRows, useStableRows } from "./useTimelineRows";
 import { useClientSettings } from "../../hooks/useSettings";
+import { flashScrollbar } from "../p3/scrollbar/flashScrollbar";
 
 function timelineListStateFor(identity: string): {
   readonly identity: string;
@@ -1058,6 +1059,7 @@ const ConversationTimeline = memo(function ConversationTimeline({
   };
 
   const handleScroll = () => {
+    flashScrollbar(listRef.current?.getScrollableNode());
     if (restoringThreadPosition || listRef.current?.getState?.().data !== rows) return;
     const isAtEnd = rememberPosition(liveFollowEnabled && !anchoredEndSpace);
     if (isAtEnd !== undefined && !citationPositioning) {

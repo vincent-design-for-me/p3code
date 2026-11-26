@@ -1,0 +1,5 @@
+/* The conversation's scrollbar thumb shows only while it scrolls (flashScrollbar.ts sets the flag),
+   or under the pointer so it can still be dragged. The app's own thumb style stays as it is. */
+.messages-timeline-scroll:not([data-scrolling]) {
+  --app-scrollbar-thumb: transparent;
+}
