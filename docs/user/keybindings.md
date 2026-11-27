@@ -44,8 +44,8 @@ Both are unbound by default. Increase wraps from the highest level to the
 lowest, and decrease wraps from the lowest level to the highest.
 
 In the composer's model picker, press Left in an empty search field or Shift+Tab
-to reach the provider tabs above the search field. Use Left/Right to move and Enter to choose. Down returns to
-model search. Right at the end of the search moves to the effort slider below the
+to reach the provider tabs below the search field. Use Left/Right to move and Enter to choose. Up or Down
+returns to model search. Right at the end of the search moves to the effort slider below the
 list, where Left/Right change the effort. Choosing a model keeps the picker open on its effort. `mod+shift+up` and `mod+shift+down` switch providers directly and clear the
 search. These provider shortcuts can also be changed in Settings.
 

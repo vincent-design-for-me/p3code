@@ -57,7 +57,7 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
   disabledInstanceIds?: ReadonlySet<ProviderInstanceId>;
   selectableUnavailableInstanceIds?: ReadonlySet<ProviderInstanceId>;
   getDisabledInstanceTooltip?: (entry: ProviderInstanceEntry) => string;
-  /** One row of tabs above the search box; Down moves to the search. */
+  /** One row of named tabs under the search box; Up or Down returns to it. */
   horizontal?: boolean;
 }) {
   const m = useMessages();
@@ -99,7 +99,11 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
       orientation={props.horizontal ? "horizontal" : "vertical"}
       onKeyDown={(event) => {
         if (event.altKey || event.ctrlKey || event.metaKey || event.shiftKey) return;
-        if (event.key === (props.horizontal ? "ArrowDown" : "ArrowRight")) {
+        if (
+          props.horizontal
+            ? event.key === "ArrowUp" || event.key === "ArrowDown"
+            : event.key === "ArrowRight"
+        ) {
           event.preventDefault();
           props.onFocusSearch();
           return;
@@ -131,6 +135,9 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                         aria-pressed={props.selectedInstanceId === "favorites"}
                       >
                         <StarIcon className="size-5 fill-current shrink-0" aria-hidden />
+                        {props.horizontal ? (
+                          <span data-model-picker-tab-label>{m(msg("Favorites"))}</span>
+                        ) : null}
                       </Toolbar.Button>
                     }
                   />
@@ -204,6 +211,9 @@ export const ModelPickerSidebar = memo(function ModelPickerSidebar(props: {
                   }
                   {...(entry.accentColor ? { badgeClassName: "h-3 min-w-3 px-0.5 text-5xs" } : {})}
                 />
+                {props.horizontal ? (
+                  <span data-model-picker-tab-label>{entry.displayName}</span>
+                ) : null}
               </Toolbar.Button>
             );
 

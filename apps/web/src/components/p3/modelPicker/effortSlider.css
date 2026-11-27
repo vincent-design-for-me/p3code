@@ -1,0 +1,282 @@
+/* The effort slider's glow. The sheen, the pulse, the bolt's halo and the canvas pixels (top level trail, fast stream) loop while the
+   model picker is open (its popup unmounts on close); the user approved that exception to the
+   no-continuous-animation rule for this popup. CSS loops move only transform and opacity. */
+[data-effort-slider] {
+  --effort-color: oklch(0.68 0.2 var(--effort-hue, 290));
+  /* A slightly under-damped snap: the thumb overshoots its stop a little and settles. */
+  --effort-snap: cubic-bezier(0.34, 1.45, 0.5, 1);
+}
+
+[data-effort-dot] {
+  box-shadow: 0 0 8px var(--effort-color);
+}
+
+[data-effort-track] {
+  box-shadow: inset 0 1px 3px rgb(0 0 0 / 0.28);
+}
+
+[data-effort-fill] {
+  background: linear-gradient(
+    90deg,
+    transparent,
+    color-mix(in oklab, var(--effort-color) 45%, transparent) 55%,
+    var(--effort-color)
+  );
+  transition:
+    width 280ms var(--effort-snap),
+    opacity 300ms ease;
+}
+
+/* At the top level the fill steps back so the canvas trail reads. */
+[data-effort-slider][data-top] [data-effort-fill] {
+  opacity: 0.35;
+}
+
+[data-effort-fill]::after {
+  content: "";
+  position: absolute;
+  inset-block: 0;
+  left: 0;
+  width: 45%;
+  background: linear-gradient(90deg, transparent, rgb(255 255 255 / 0.38), transparent);
+  transform: translateX(-120%);
+  animation: p3-effort-sheen 2.4s ease-in-out infinite;
+}
+
+/* A fast speed streams the canvas pixels through the fill instead of the sheen. */
+[data-effort-slider][data-fast] [data-effort-fill]::after {
+  display: none;
+}
+
+/* A fast speed lights the whole bar: a brighter fill, a white rim and a halo in the level's color. */
+[data-effort-track] {
+  transition: box-shadow 300ms ease;
+}
+
+[data-effort-slider][data-fast] [data-effort-track] {
+  box-shadow:
+    inset 0 1px 3px rgb(0 0 0 / 0.2),
+    0 0 0 1.5px rgb(255 255 255 / 0.75),
+    0 0 12px color-mix(in oklab, var(--effort-color) 70%, transparent),
+    0 0 28px color-mix(in oklab, var(--effort-color) 35%, transparent);
+}
+
+[data-effort-slider][data-fast] [data-effort-fill] {
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--effort-color) 88%, white),
+    color-mix(in oklab, var(--effort-color) 70%, white)
+  );
+  opacity: 1;
+}
+
+/* The speed bolt turns yellow when on: it springs up, then a halo grows and keeps breathing. */
+[data-compact-picker-speed] {
+  --bolt-color: oklch(0.87 0.17 92);
+}
+
+[data-compact-picker-speed][data-on] {
+  color: var(--bolt-color);
+}
+
+[data-compact-picker-speed][data-on] [data-flash-glyph] {
+  filter: drop-shadow(0 0 3px var(--bolt-color))
+    drop-shadow(0 0 8px color-mix(in oklab, var(--bolt-color) 60%, transparent));
+  animation: p3-bolt-ignite 520ms var(--effort-snap) both;
+}
+
+[data-compact-picker-speed][data-on] [data-flash-glyph] path {
+  fill: color-mix(in oklab, var(--bolt-color) 40%, transparent);
+}
+
+[data-flash-glow] {
+  border-radius: 9999px;
+  background: radial-gradient(
+    circle,
+    color-mix(in oklab, var(--bolt-color) 55%, transparent) 0%,
+    transparent 65%
+  );
+  animation:
+    p3-bolt-grow 520ms ease-out both,
+    p3-bolt-breathe 1.4s 520ms ease-in-out infinite alternate;
+}
+
+[data-effort-glow] {
+  background: radial-gradient(circle, var(--effort-color) 0%, transparent 68%);
+  opacity: 0.55;
+  animation: p3-effort-pulse 1.6s ease-in-out infinite alternate;
+}
+
+[data-effort-anchor] {
+  transition: left 280ms var(--effort-snap);
+}
+
+/* Each step lands with a shake and a flash once the fill reaches the thumb; the top level gets
+   the bigger landing from EffortSlider's playLanding instead. */
+[data-effort-slider]:not([data-top]) [data-effort-thumb][data-moved] {
+  animation: p3-effort-shake 380ms 200ms ease-in-out both;
+}
+
+[data-effort-slider][data-top] [data-effort-burst],
+[data-effort-slider][data-top] [data-effort-fill]::after {
+  display: none;
+}
+
+[data-effort-burst] {
+  border: 2px solid var(--effort-color);
+  opacity: 0;
+  animation: p3-effort-burst 650ms 240ms ease-out both;
+}
+
+[data-effort-flash] {
+  background: radial-gradient(
+    circle,
+    white 0%,
+    color-mix(in srgb, var(--effort-color) 70%, transparent) 30%,
+    transparent 68%
+  );
+  opacity: 0;
+}
+
+[data-effort-ring] {
+  border: 2px solid var(--effort-color);
+  opacity: 0;
+}
+
+/* Sparks and the light beam fly past the track, so their canvas reaches above and below it. */
+[data-effort-effects] {
+  position: absolute;
+  inset-inline: 0;
+  top: -24px;
+  width: 100%;
+  height: calc(100% + 48px);
+  pointer-events: none;
+}
+
+[data-effort-value] {
+  perspective: 180px;
+}
+
+[data-effort-value] > strong {
+  transform-origin: 50% 50% -11px;
+}
+
+[data-effort-value] > [data-roll="up"] {
+  animation: p3-effort-roll-up 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+[data-effort-value] > [data-roll="down"] {
+  animation: p3-effort-roll-down 300ms cubic-bezier(0.2, 0.8, 0.2, 1) both;
+}
+
+@keyframes p3-effort-roll-up {
+  from {
+    opacity: 0;
+    transform: rotateX(-88deg);
+  }
+}
+
+@keyframes p3-effort-roll-down {
+  from {
+    opacity: 0;
+    transform: rotateX(88deg);
+  }
+}
+
+@keyframes p3-bolt-ignite {
+  from {
+    transform: scale(0.6);
+  }
+  50% {
+    transform: scale(1.35);
+  }
+}
+
+@keyframes p3-bolt-grow {
+  from {
+    opacity: 0;
+    transform: scale(0.3);
+  }
+  60% {
+    opacity: 1;
+    transform: scale(1.7);
+  }
+  to {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+}
+
+@keyframes p3-bolt-breathe {
+  from {
+    opacity: 0.8;
+    transform: scale(1.2);
+  }
+  to {
+    opacity: 1;
+    transform: scale(1.5);
+  }
+}
+
+@keyframes p3-effort-sheen {
+  60%,
+  100% {
+    transform: translateX(260%);
+  }
+}
+
+@keyframes p3-effort-pulse {
+  from {
+    opacity: 0.4;
+    transform: scale(0.85);
+  }
+  to {
+    opacity: 0.85;
+    transform: scale(1.15);
+  }
+}
+
+@keyframes p3-effort-shake {
+  0%,
+  100% {
+    transform: none;
+  }
+  20% {
+    transform: translateX(-2px) rotate(-8deg);
+  }
+  40% {
+    transform: translateX(2px) rotate(7deg);
+  }
+  60% {
+    transform: translateX(-1.5px) rotate(-4deg);
+  }
+  80% {
+    transform: translateX(1px) rotate(2deg);
+  }
+}
+
+@keyframes p3-effort-burst {
+  from {
+    opacity: 0.9;
+    transform: scale(0.9);
+  }
+  to {
+    opacity: 0;
+    transform: scale(2.1);
+  }
+}
+
+[data-effort-slider][data-locked] *,
+[data-effort-slider][data-locked] *::before,
+[data-effort-slider][data-locked] *::after {
+  animation: none !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-effort-slider] *,
+  [data-effort-slider] *::before,
+  [data-effort-slider] *::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}

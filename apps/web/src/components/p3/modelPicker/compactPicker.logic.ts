@@ -1,14 +1,15 @@
 import type { CSSProperties } from "react";
 
 /**
- * The compact picker's model list fits the tallest provider tab, from 158px to 280px, and gives
- * up height before the effort section and footer below it when the window is short.
+ * The compact picker's model list fits the tallest provider tab, from 190px to 330px, and gives
+ * up height before the effort card below it when the window is short. Its rows are 1.25 times the
+ * list's usual 32px, so the tab's row units scale by that.
  */
 export function compactPickerContentStyle(tallestTabUnits: number): CSSProperties {
-  const fit = `clamp(158px, calc(76px + var(--spacing) * ${Math.max(0, tallestTabUnits)}), 280px)`;
+  const fit = `clamp(190px, calc(100px + var(--spacing) * ${Math.max(0, tallestTabUnits)} * 1.25), 330px)`;
   return {
-    height: `min(${fit}, max(96px, calc(var(--available-height, 440px) - 98px)))`,
-    minHeight: 86,
+    height: `min(${fit}, max(140px, calc(var(--available-height, 560px) - 240px)))`,
+    minHeight: 120,
   };
 }
 

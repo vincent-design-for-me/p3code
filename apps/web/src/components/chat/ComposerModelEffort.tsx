@@ -39,7 +39,7 @@ type SelectDescriptor = Extract<ProviderOptionDescriptor, { type: "select" }>;
 type BooleanDescriptor = Extract<ProviderOptionDescriptor, { type: "boolean" }>;
 
 /** Service tiers, Claude's Fast mode, and Ultracode sit in the footer, not the column. */
-function splitSpeed(
+export function splitSpeed(
   selects: ReadonlyArray<SelectDescriptor>,
   toggles: ReadonlyArray<BooleanDescriptor>,
 ) {

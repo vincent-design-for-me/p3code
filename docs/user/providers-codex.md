@@ -156,12 +156,12 @@ preview uses its own browser session.
 
 ## Use Daybreak
 
-Models with cyber access programs show a Cyber Access option in the model
-options. It starts on Standard, or on Daybreak when `config.toml` in your Codex
-home sets `daybreak = true` or the model only runs under Daybreak. Your choice carries
-over to new threads. Custom models do not offer it. If Codex rejects a turn
-because your login lacks the program, switch Cyber Access back to Standard or
-sign in to Codex with an account that has it.
+P3 Code does not show a Cyber Access option. Models with cyber access programs
+run on Standard, or on Daybreak when `config.toml` in your Codex home sets
+`daybreak = true` or the model only runs under Daybreak. Custom models do not
+offer it. If Codex rejects a turn because your login lacks the program, remove
+`daybreak = true` from `config.toml` or sign in to Codex with an account that
+has it.
 
 ## Codex says I hit a usage limit
 

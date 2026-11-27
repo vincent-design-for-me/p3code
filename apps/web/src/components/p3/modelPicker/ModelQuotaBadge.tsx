@@ -6,7 +6,8 @@ import { pickerQuota, quotaWindowLabel, quotaWindowPeriod } from "../quota/model
 
 /**
  * What is left of the model's scarcest session window, else its weekly one, which carries a
- * narrow "1w" marker. A provider that reports no limits gets a quiet rule instead of a figure.
+ * narrow "1w" marker. Amber under half, red under a tenth. A provider that reports no limits gets
+ * a quiet rule instead of a figure.
  */
 export function ModelQuotaBadge(props: { provider: ServerProvider | undefined; slug: string }) {
   const gt = useGT();
@@ -29,13 +30,17 @@ export function ModelQuotaBadge(props: { provider: ServerProvider | undefined; s
     <span
       data-model-quota={quota.remaining}
       className={cn(
-        "inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap text-3xs font-medium tabular-nums",
-        quota.remaining <= 10 ? "text-error-foreground" : "text-muted-foreground",
+        "inline-flex shrink-0 items-baseline gap-0.5 whitespace-nowrap text-xs font-medium tabular-nums",
+        quota.remaining <= 10
+          ? "text-error-foreground"
+          : quota.remaining <= 50
+            ? "text-warning-foreground"
+            : "text-muted-foreground",
       )}
     >
       {gt("{left}% left", { left })}
       {quota.weekly ? (
-        <span aria-hidden="true" className="font-normal">
+        <span aria-hidden="true" className="text-3xs font-normal">
           {quotaWindowPeriod(quota.window, locale, m)}
         </span>
       ) : null}

@@ -54,15 +54,15 @@ describe("effortSliderFill", () => {
 });
 
 describe("compactPickerContentStyle", () => {
-  it("clamps the tallest tab between 158px and 280px under the available height", () => {
+  it("clamps the tallest tab between 190px and 330px under the available height", () => {
     const style = compactPickerContentStyle(25.5);
     expect(style.height).toBe(
-      "min(clamp(158px, calc(76px + var(--spacing) * 25.5), 280px), max(96px, calc(var(--available-height, 440px) - 98px)))",
+      "min(clamp(190px, calc(100px + var(--spacing) * 25.5 * 1.25), 330px), max(140px, calc(var(--available-height, 560px) - 240px)))",
     );
-    expect(style.minHeight).toBe(86);
+    expect(style.minHeight).toBe(120);
   });
 
   it("never asks for a negative list", () => {
-    expect(String(compactPickerContentStyle(-4).height)).toContain("var(--spacing) * 0)");
+    expect(String(compactPickerContentStyle(-4).height)).toContain("var(--spacing) * 0 * 1.25)");
   });
 });

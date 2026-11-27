@@ -365,6 +365,8 @@ export function useTraitsSelection({
     changeSelect: (
       descriptor: Extract<ProviderOptionDescriptor, { type: "select" }>,
       value: string,
+      /** Other options to set in the same write; a second change would start from the old values. */
+      alongside: ReadonlyArray<readonly [descriptorId: string, value: string | boolean]> = [],
     ) => {
       // Whether a pick applies, and the options it writes, do not depend on the prompt text.
       const change = getTraitSelectChange(selected, descriptor, "", value);
@@ -372,7 +374,17 @@ export function useTraitsSelection({
       onPromptEdit?.(
         (prompt) => getTraitSelectChange(selected, descriptor, prompt, value)?.prompt ?? prompt,
       );
-      updateModelOptions(change.modelOptions);
+      updateModelOptions(
+        alongside.length === 0
+          ? change.modelOptions
+          : buildProviderOptionSelectionsFromDescriptors(
+              alongside.reduce(
+                (descriptors, [descriptorId, next]) =>
+                  replaceDescriptorCurrentValue(descriptors, descriptorId, next),
+                replaceDescriptorCurrentValue(selected.descriptors, descriptor.id, value),
+              ),
+            ),
+      );
     },
     changeBoolean: (descriptorId: string, value: boolean) => {
       updateModelOptions(
