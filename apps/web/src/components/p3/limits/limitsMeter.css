@@ -1,0 +1,66 @@
+/* A five-hour chip's ring: the account's gradient sweeps over a faint track. */
+[data-p3-limits-ring] {
+  border-radius: 50%;
+  background: conic-gradient(
+    var(--p3-limits-start),
+    var(--p3-limits-end) var(--p3-limits-sweep),
+    color-mix(in oklab, var(--foreground) 14%, transparent) var(--p3-limits-sweep)
+  );
+  mask-image: radial-gradient(farthest-side, transparent 52%, #000 56%);
+}
+
+/* The glossy meter: a static glow and top highlight, plus a sheen that crosses once per hover. */
+[data-p3-limits-meter] {
+  position: relative;
+  overflow: hidden;
+  background: linear-gradient(90deg, var(--p3-limits-start), var(--p3-limits-end));
+  box-shadow:
+    0 0 10px -2px color-mix(in oklab, var(--p3-limits-end) 70%, transparent),
+    inset 0 -1px 0 color-mix(in oklab, #000 12%, transparent);
+}
+
+[data-p3-limits-meter]::before,
+[data-p3-limits-meter]::after {
+  position: absolute;
+  content: "";
+  pointer-events: none;
+}
+
+[data-p3-limits-meter]::before {
+  inset: 0 0 50%;
+  border-radius: inherit;
+  background: linear-gradient(rgb(255 255 255 / 0.45), rgb(255 255 255 / 0.05));
+}
+
+[data-p3-limits-meter]::after {
+  inset: 0 auto 0 0;
+  width: 45%;
+  background: linear-gradient(100deg, transparent 20%, rgb(255 255 255 / 0.75), transparent 80%);
+  opacity: 0;
+  transform: translateX(-110%) skewX(-20deg);
+}
+
+.group\/limit-card:hover [data-p3-limits-meter]::after,
+.group\/limit-card:focus-within [data-p3-limits-meter]::after {
+  animation: p3-limits-sheen 1.1s cubic-bezier(0.25, 0.8, 0.3, 1) 1 both;
+}
+
+@keyframes p3-limits-sheen {
+  0% {
+    opacity: 0;
+    transform: translateX(-110%) skewX(-20deg);
+  }
+  15% {
+    opacity: 1;
+  }
+  100% {
+    opacity: 0;
+    transform: translateX(240%) skewX(-20deg);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  [data-p3-limits-meter]::after {
+    display: none;
+  }
+}

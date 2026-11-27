@@ -1,4 +1,6 @@
 {
+  "b2d6a05df3eb93c3": "Réinitialisation hebdomadaire : {date}",
+  "1c0f3be8d435eaf1": "Réinitialisation le {date}",
   "673adfb94a981695": "Cache {percent}",
   "af1b37a01a6b26ba": "{count, plural, one {{count} tour} other {{count} tours}}",
   "c3dcb57723374860": "Ouverte",

@@ -1,4 +1,6 @@
 {
+  "b2d6a05df3eb93c3": "週次リセット：{date}",
+  "1c0f3be8d435eaf1": "{date}にリセット",
   "673adfb94a981695": "キャッシュ {percent}",
   "af1b37a01a6b26ba": "{count, plural, other {{count} ターン}}",
   "c3dcb57723374860": "未完了",

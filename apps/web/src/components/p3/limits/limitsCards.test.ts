@@ -8,7 +8,13 @@ import {
 import { collectLimitAccounts, collectLimitPools } from "@t3tools/shared/usageLimits";
 import { describe, expect, it } from "vite-plus/test";
 
-import { limitCardSections, primaryEntry, windowlessLimitAccounts } from "./limitsCards";
+import {
+  type LimitCardEntry,
+  limitCardSections,
+  primaryEntry,
+  splitCardEntries,
+  windowlessLimitAccounts,
+} from "./limitsCards";
 
 const now = Date.parse("2026-09-03T12:00:00.000Z");
 const checkedAt = "2026-09-03T11:00:00.000Z";
@@ -91,8 +97,47 @@ describe("primaryEntry", () => {
   });
 });
 
+describe("splitCardEntries", () => {
+  const entry = (
+    id: string,
+    kind: ServerProviderUsageWindow["kind"],
+    usedPercent: number,
+  ): LimitCardEntry => ({
+    key: id,
+    label: id,
+    description: undefined,
+    reset: undefined,
+    window: { id, kind, label: id, usedPercent },
+  });
+  const ids = (entries: readonly LimitCardEntry[]) => entries.map((item) => item.key);
+
+  it("bars the binding weekly and keeps every five-hour window as a chip", () => {
+    const split = splitCardEntries([
+      entry("gemini-5h", "session", 25),
+      entry("gemini-weekly", "weekly", 35),
+      entry("3p-5h", "session", 0),
+      entry("3p-weekly", "weekly", 8),
+      entry("monthly", "monthly", 50),
+    ]);
+    expect(ids(split.chips)).toEqual(["gemini-5h", "3p-5h"]);
+    expect(split.main?.key).toBe("gemini-weekly");
+    expect(ids(split.rest)).toEqual(["3p-weekly", "monthly"]);
+  });
+
+  it("falls back to monthly, then other windows, then the lowest five-hour window", () => {
+    expect(splitCardEntries([entry("other", "other", 0), entry("m", "monthly", 0)]).main?.key).toBe(
+      "m",
+    );
+    expect(splitCardEntries([entry("other", "other", 0)]).main?.key).toBe("other");
+    const sessionsOnly = splitCardEntries([entry("a", "session", 10), entry("b", "session", 60)]);
+    expect(sessionsOnly.main?.key).toBe("b");
+    expect(ids(sessionsOnly.chips)).toEqual(["a"]);
+    expect(splitCardEntries([]).main).toBeNull();
+  });
+});
+
 describe("limitCardSections", () => {
-  it("orders accounts by key, numbers them, and splits the primary window from the rest", () => {
+  it("orders accounts by key, numbers them, and splits chips, bar, and the rest", () => {
     const [codex] = sections(
       presentations([
         "desk",
@@ -107,8 +152,9 @@ describe("limitCardSections", () => {
       ["desk:work10", 2],
     ]);
     const work10 = codex?.cards[1];
-    expect(work10?.primary?.window.id).toBe("five_hour");
-    expect(work10?.rest.map((entry) => entry.window.id)).toEqual(["weekly"]);
+    expect(work10?.chips.map((entry) => entry.window.id)).toEqual(["five_hour"]);
+    expect(work10?.main?.window.id).toBe("weekly");
+    expect(work10?.rest).toEqual([]);
   });
 
   it("leaves a lone account unnumbered and without a pooled refill", () => {
@@ -138,7 +184,7 @@ describe("limitCardSections", () => {
     expect(
       result.map((section) => [
         section.driver,
-        section.cards.map((card) => [card.account.key, card.primary === null]),
+        section.cards.map((card) => [card.account.key, card.main === null]),
       ]),
     ).toEqual([
       [

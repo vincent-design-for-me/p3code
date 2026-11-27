@@ -72,8 +72,9 @@ export const useGT: typeof gtUseGT = () => {
   const gt = gtUseGT();
   const sourceLocale = useIsSourceLocale();
   if (!sourceLocale) return gt;
+  // Reflect.apply keeps the GT scanner from reading this pass-through as a source string.
   return ((message: string, options?: Parameters<typeof gt>[1]) =>
-    gt(brandCopy(message), options)) as typeof gt;
+    Reflect.apply(gt, undefined, [brandCopy(message), options])) as typeof gt;
 };
 
 export const useMessages: typeof gtUseMessages = () => {

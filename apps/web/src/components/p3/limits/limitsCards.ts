@@ -6,6 +6,7 @@ import {
   type LimitPoolWindow,
   type LimitPresentations,
   providersWithLimits,
+  remainingPercent,
 } from "@t3tools/shared/usageLimits";
 import { cursorUsageWindowDetails, limitsNotice } from "@t3tools/shared/usageLimitsCopy";
 
@@ -26,7 +27,10 @@ export interface LimitCard {
   readonly account: LimitAccount;
   /** Set when the provider has several accounts, so unnamed ones read "Account 2". */
   readonly number: number | null;
-  readonly primary: LimitCardEntry | null;
+  /** Five-hour windows, shown as chips above the bar. */
+  readonly chips: readonly LimitCardEntry[];
+  /** The window the bar and the reset date describe. */
+  readonly main: LimitCardEntry | null;
   readonly rest: readonly LimitCardEntry[];
 }
 
@@ -64,6 +68,38 @@ export function primaryEntry<T extends { readonly window: ServerProviderUsageWin
     entries[0] ??
     null
   );
+}
+
+function lowestRemaining(entries: readonly LimitCardEntry[]): LimitCardEntry | undefined {
+  let lowest: LimitCardEntry | undefined;
+  for (const entry of entries) {
+    if (lowest === undefined || remainingPercent(entry.window) < remainingPercent(lowest.window)) {
+      lowest = entry;
+    }
+  }
+  return lowest;
+}
+
+/**
+ * The bar shows the binding weekly window (else the first monthly or other one), five-hour
+ * windows become chips, and every remaining window is listed below so none is dropped.
+ */
+export function splitCardEntries(
+  entries: readonly LimitCardEntry[],
+): Pick<LimitCard, "chips" | "main" | "rest"> {
+  const sessions = entries.filter((entry) => entry.window.kind === "session");
+  const longer = entries.filter((entry) => entry.window.kind !== "session");
+  const main =
+    lowestRemaining(longer.filter((entry) => entry.window.kind === "weekly")) ??
+    longer.find((entry) => entry.window.kind === "monthly") ??
+    longer[0] ??
+    lowestRemaining(sessions) ??
+    null;
+  return {
+    chips: sessions.filter((entry) => entry !== main),
+    main,
+    rest: longer.filter((entry) => entry !== main),
+  };
 }
 
 const emailIdentity = (driver: ServerProvider["driver"], email: string | undefined) => {
@@ -164,13 +200,10 @@ export function limitCardSections(
       driver,
       nextRefill,
       cards: sorted.map((account, index) => {
-        const accountEntries = entries.get(account.key) ?? [];
-        const primary = primaryEntry(accountEntries);
         return {
           account,
           number: sorted.length > 1 ? index + 1 : null,
-          primary,
-          rest: accountEntries.filter((entry) => entry !== primary),
+          ...splitCardEntries(entries.get(account.key) ?? []),
         };
       }),
     };

@@ -9,9 +9,9 @@ import {
   remainingPercent,
 } from "@t3tools/shared/usageLimits";
 import { formatDuration, formatResetsIn, limitsNotice } from "@t3tools/shared/usageLimitsCopy";
-import { T, Var, useGT, useMessages } from "gt-react";
+import { T, Var, useGT, useLocale, useMessages } from "gt-react";
 import { TicketIcon } from "lucide-react";
-import type { CSSProperties } from "react";
+import type { CSSProperties, ReactNode } from "react";
 
 import { cn } from "../../../lib/utils";
 import { ProviderInstanceIcon } from "../../chat/ProviderInstanceIcon";
@@ -19,6 +19,7 @@ import { providerClients } from "../../settings/providerDriverMeta";
 import { RedactedSensitiveText } from "../../settings/RedactedSensitiveText";
 import { PopoverTrigger, type PopoverCreateHandle } from "../../ui/popover";
 import { ResetCreditDialog, useResetCredit } from "../../usage/UsageLimits";
+import { quotaWindowLabel } from "../quota/modelQuotaWindows";
 import {
   type LimitCard,
   type LimitCardEntry,
@@ -27,7 +28,7 @@ import {
   meterColors,
   windowlessLimitAccounts,
 } from "./limitsCards";
-import "./limitsDial.css";
+import "./limitsMeter.css";
 
 /** Mirrors the pooled view's segment payload so both share its one popover. */
 interface LimitCardPayload {
@@ -43,48 +44,35 @@ type Redeem = ReturnType<typeof useResetCredit> | null;
 const windowSurface =
   "cursor-pointer text-start text-foreground outline-none transition-colors motion-reduce:transition-none hover:bg-(--p3-limits-start)/9 focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset data-popup-open:bg-(--p3-limits-start)/9";
 
-function LimitWindowButton({
-  account,
-  accountLabel,
-  entry,
-  now,
-  primary,
-  redeem,
-  popover,
-}: {
+interface WindowProps {
   readonly account: LimitAccount;
   readonly accountLabel: string;
   readonly entry: LimitCardEntry;
   readonly now: number;
-  readonly primary: boolean;
   readonly redeem: Redeem;
   readonly popover: LimitPopover;
-}) {
+}
+
+/** Each window opens the pooled view's popover, which holds the details and the reset redeem. */
+function LimitWindowTrigger({
+  account,
+  accountLabel,
+  entry,
+  now,
+  redeem,
+  popover,
+  className,
+  children,
+}: WindowProps & { readonly className: string; readonly children: ReactNode }) {
   const gt = useGT();
   const m = useMessages();
-  const { window } = entry;
-  const remaining = remainingPercent(window);
-  const reset = formatResetsIn(window, now, m);
-  const pace = paceRemainingPercent(window, now);
-  const credits = primary ? (account.limits.resetCredits?.availableCount ?? 0) : 0;
-  const resetLabel = reset ? (
-    <span
-      className={cn(
-        "inline-flex flex-wrap items-baseline gap-1 leading-tight text-muted-foreground tabular-nums",
-        primary
-          ? "rounded-full border border-border bg-background px-1.5 py-1 text-2xs"
-          : "max-w-[52%] shrink-0 text-3xs",
-      )}
-    >
-      <span aria-hidden>↻</span>
-      {reset}
-    </span>
-  ) : null;
-  const title = <span className="wrap-anywhere">{entry.label}</span>;
   const ariaLabel = [
     accountLabel,
-    gt("{label}: {remaining}% left", { label: entry.label, remaining }),
-    reset,
+    gt("{label}: {remaining}% left", {
+      label: entry.label,
+      remaining: remainingPercent(entry.window),
+    }),
+    formatResetsIn(entry.window, now, m),
     entry.description,
   ]
     .filter(Boolean)
@@ -92,77 +80,126 @@ function LimitWindowButton({
   return (
     <PopoverTrigger
       handle={popover}
-      payload={{ account, window, reset: entry.reset, redeem }}
+      payload={{ account, window: entry.window, reset: entry.reset, redeem }}
       openOnHover
       render={
-        <button
-          type="button"
-          aria-label={ariaLabel}
-          className={cn(
-            "grid w-full min-w-0",
-            windowSurface,
-            primary
-              ? "grid-cols-[auto_minmax(0,1fr)] items-center gap-3 rounded-2xl border border-foreground/6 bg-(--p3-limits-start)/4 px-2 py-2.5 @min-[43rem]/limits:gap-4.5 @min-[43rem]/limits:px-4"
-              : "gap-1.5 rounded-lg border border-transparent px-1.5 py-2",
-          )}
-        />
+        <button type="button" aria-label={ariaLabel} className={cn(windowSurface, className)} />
       }
     >
-      {primary ? (
-        <>
-          <span
-            data-p3-limits-dial
-            className="flex aspect-square w-22 @min-[43rem]/limits:w-28 flex-col items-center justify-center pb-0.5 whitespace-nowrap tabular-nums"
-            style={{ "--p3-limits-sweep": `${remaining * 2.7}deg` } as CSSProperties}
-          >
-            <strong className="text-xl leading-tight font-semibold tracking-tighter @min-[43rem]/limits:text-2xl">
-              {remaining}%
-            </strong>
-            <span className="mt-0.5 text-3xs text-muted-foreground">
-              <T context="remaining usage percentage">left</T>
-            </span>
-          </span>
-          <span className="grid min-w-0 content-center justify-items-start gap-1.5">
-            <span className="text-sm leading-tight font-semibold">{title}</span>
-            {resetLabel}
-            {credits ? (
-              <span className="inline-flex items-center gap-1 text-2xs text-muted-foreground">
-                <TicketIcon className="size-3.5" aria-hidden />
-                {gt(
-                  "{count, plural, one {{count} reset credit banked} other {{count} reset credits banked}}",
-                  { count: credits },
-                )}
-              </span>
-            ) : null}
-          </span>
-        </>
-      ) : (
-        <>
-          <span className="flex items-baseline justify-between gap-2 text-xs">
-            {title}
-            <strong className="font-semibold whitespace-nowrap tabular-nums">{remaining}%</strong>
-          </span>
-          <span className="flex items-center justify-between gap-2 text-xs">
-            <span
-              aria-hidden
-              className="relative block h-1.25 min-w-4 flex-auto rounded-full bg-foreground/10"
-            >
-              <span
-                className="block h-full rounded-full bg-linear-to-r from-(--p3-limits-start) to-(--p3-limits-end)"
-                style={{ width: `${remaining}%` }}
-              />
-              {pace === null ? null : (
-                <span
-                  className="absolute -top-0.5 h-[calc(100%+4px)] w-0.5 -translate-x-1/2 rounded-full bg-foreground ring-1 ring-background"
-                  style={{ left: `${pace}%` }}
-                />
-              )}
-            </span>
-            {resetLabel}
-          </span>
-        </>
-      )}
+      {children}
     </PopoverTrigger>
+  );
+}
+
+/** The thick, glossy meter; its sheen crosses once when the card is hovered (limitsMeter.css). */
+function LimitMeter({
+  window,
+  now,
+}: {
+  readonly window: ServerProviderUsageWindow;
+  readonly now: number;
+}) {
+  const remaining = remainingPercent(window);
+  const pace = paceRemainingPercent(window, now);
+  return (
+    <span aria-hidden className="relative block h-2.5 w-full rounded-full bg-foreground/8">
+      <span
+        data-p3-limits-meter
+        className="block h-full min-w-2.5 rounded-full"
+        style={{ width: `${remaining}%` }}
+      />
+      {pace === null ? null : (
+        <span
+          className="absolute -top-1 h-[calc(100%+8px)] w-0.5 -translate-x-1/2 rounded-full bg-foreground ring-1 ring-background"
+          style={{ left: `${pace}%` }}
+        />
+      )}
+    </span>
+  );
+}
+
+function FiveHourChip(props: WindowProps) {
+  const locale = useLocale();
+  const m = useMessages();
+  const { window } = props.entry;
+  const remaining = remainingPercent(window);
+  const resetMs = window.resetsAt ? Date.parse(window.resetsAt) - props.now : 0;
+  return (
+    <LimitWindowTrigger
+      {...props}
+      className="inline-flex min-w-0 items-center gap-1.5 rounded-full border border-border bg-background py-1 ps-1 pe-2.5 text-xs"
+    >
+      <span
+        aria-hidden
+        data-p3-limits-ring
+        className="size-4.5 shrink-0"
+        style={{ "--p3-limits-sweep": `${remaining * 3.6}deg` } as CSSProperties}
+      />
+      <span className="min-w-0 truncate text-muted-foreground">
+        {quotaWindowLabel(window, locale, m)}
+      </span>
+      <strong className="font-semibold tabular-nums">{remaining}%</strong>
+      {resetMs > 0 ? (
+        <span className="text-2xs whitespace-nowrap text-muted-foreground tabular-nums">
+          ↻ {formatDuration(resetMs, m)}
+        </span>
+      ) : null}
+    </LimitWindowTrigger>
+  );
+}
+
+function MainMeter(props: WindowProps) {
+  const locale = useLocale();
+  const m = useMessages();
+  const { window } = props.entry;
+  const reset = formatResetsIn(window, props.now, m);
+  return (
+    <LimitWindowTrigger
+      {...props}
+      className="-mx-2 grid w-[calc(100%+1rem)] gap-2.5 rounded-xl px-2 pt-2.5 pb-2"
+    >
+      <LimitMeter window={window} now={props.now} />
+      <span className="flex items-baseline justify-between gap-3 text-xs">
+        <span className="min-w-0 wrap-anywhere">
+          <span className="font-medium">{quotaWindowLabel(window, locale, m)}</span>
+          {reset ? <span className="text-muted-foreground tabular-nums"> · ↻ {reset}</span> : null}
+        </span>
+        <strong className="text-sm font-semibold tabular-nums">{remainingPercent(window)}%</strong>
+      </span>
+    </LimitWindowTrigger>
+  );
+}
+
+function SecondaryRow(props: WindowProps) {
+  const locale = useLocale();
+  const m = useMessages();
+  const { window } = props.entry;
+  const reset = formatResetsIn(window, props.now, m);
+  return (
+    <LimitWindowTrigger
+      {...props}
+      className="-mx-2 grid w-[calc(100%+1rem)] gap-1.5 rounded-lg px-2 py-1.5"
+    >
+      <span className="flex items-baseline justify-between gap-2 text-xs">
+        <span className="min-w-0 wrap-anywhere">{quotaWindowLabel(window, locale, m)}</span>
+        <strong className="font-semibold whitespace-nowrap tabular-nums">
+          {remainingPercent(window)}%
+        </strong>
+      </span>
+      <span className="flex items-center justify-between gap-2">
+        <span aria-hidden className="block h-1.5 min-w-4 flex-auto rounded-full bg-foreground/8">
+          <span
+            className="block h-full rounded-full bg-linear-to-r from-(--p3-limits-start) to-(--p3-limits-end)"
+            style={{ width: `${remainingPercent(window)}%` }}
+          />
+        </span>
+        {reset ? (
+          <span className="max-w-[55%] shrink-0 text-3xs text-muted-foreground tabular-nums">
+            ↻ {reset}
+          </span>
+        ) : null}
+      </span>
+    </LimitWindowTrigger>
   );
 }
 
@@ -206,7 +243,8 @@ function LimitAccountCard({
 }) {
   const gt = useGT();
   const m = useMessages();
-  const { account, primary, rest } = card;
+  const locale = useLocale();
+  const { account, chips, main, rest } = card;
   const [start, end] = meterColors(
     account.driver,
     normalizeProviderAccentColor(account.accentColor),
@@ -220,45 +258,80 @@ function LimitAccountCard({
     card.number === null ? gt("Account") : gt("Account {number}", { number: card.number });
   const named = Boolean(account.displayName) && account.displayName !== providerName;
   const accountLabel = named && account.displayName ? account.displayName : generic;
+  const resetsAt = main?.window.resetsAt;
+  const resetDate = resetsAt
+    ? new Intl.DateTimeFormat(locale, {
+        weekday: "short",
+        month: "short",
+        day: "numeric",
+        hour: "numeric",
+        minute: "2-digit",
+      }).format(Date.parse(resetsAt))
+    : null;
+  const credits = account.limits.resetCredits?.availableCount ?? 0;
+  const creditsLabel = gt(
+    "{count, plural, one {{count} reset credit banked} other {{count} reset credits banked}}",
+    { count: credits },
+  );
+  const windowProps = { account, accountLabel, now, redeem, popover };
   return (
     <article
-      className="h-full min-w-0 rounded-3xl border border-border/80 bg-background bg-linear-to-bl from-(--p3-limits-start)/8 to-transparent to-60% p-3.75 shadow-xs/5"
+      className="group/limit-card h-full min-w-0 rounded-3xl border border-border/70 bg-background p-5 shadow-xs/5"
       style={{ "--p3-limits-start": start, "--p3-limits-end": end } as CSSProperties}
     >
-      <header className="mb-3 flex flex-wrap items-baseline justify-between gap-x-2.5 gap-y-1">
-        <h3 className="min-w-0 text-sm font-semibold wrap-anywhere text-foreground">
-          <AccountHeading account={account} generic={generic} named={named} />
-        </h3>
-        {meta ? <span className="text-2xs wrap-anywhere text-muted-foreground">{meta}</span> : null}
+      <header className="flex items-start justify-between gap-3">
+        <div className="grid min-w-0 gap-1">
+          <h3 className="min-w-0 text-base leading-tight font-semibold wrap-anywhere text-foreground">
+            <AccountHeading account={account} generic={generic} named={named} />
+          </h3>
+          {resetDate || meta ? (
+            <p className="text-xs wrap-anywhere text-muted-foreground tabular-nums">
+              {resetDate
+                ? main?.window.kind === "weekly"
+                  ? gt("Weekly reset: {date}", { date: resetDate })
+                  : gt("Resets {date}", { date: resetDate })
+                : null}
+              {resetDate && meta ? " · " : null}
+              {meta}
+            </p>
+          ) : null}
+        </div>
+        <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-(--p3-limits-start)/10">
+          <ProviderInstanceIcon
+            driverKind={account.driver}
+            displayName={providerName}
+            indicatorBackground="var(--background)"
+            className="size-6"
+            iconClassName="size-5 text-foreground/85"
+          />
+        </span>
       </header>
-      {primary ? (
-        <LimitWindowButton
-          account={account}
-          accountLabel={accountLabel}
-          entry={primary}
-          now={now}
-          primary
-          redeem={redeem}
-          popover={popover}
-        />
+      {chips.length > 0 || credits > 0 ? (
+        <div className="mt-4 flex flex-wrap items-center gap-1.5">
+          {chips.map((entry) => (
+            <FiveHourChip key={entry.key} entry={entry} {...windowProps} />
+          ))}
+          {credits > 0 ? (
+            <span className="ms-auto inline-flex items-center gap-1 text-2xs text-muted-foreground">
+              <TicketIcon className="size-3.5" aria-hidden />
+              {creditsLabel}
+            </span>
+          ) : null}
+        </div>
+      ) : null}
+      {main ? (
+        <div className="mt-3">
+          <MainMeter entry={main} {...windowProps} />
+        </div>
       ) : (
-        <p className="min-h-20 rounded-2xl border border-dashed border-border p-3 text-xs text-muted-foreground">
+        <p className="mt-4 rounded-2xl border border-dashed border-border p-3 text-xs text-muted-foreground">
           {limitsNotice(account.limits, m) ?? gt("No limits reported.")}
         </p>
       )}
       {rest.length > 0 ? (
-        <div className="mt-2 flex flex-col gap-0.5">
+        <div className="mt-1.5 flex flex-col border-t border-border/60 pt-1.5">
           {rest.map((entry) => (
-            <LimitWindowButton
-              key={entry.key}
-              account={account}
-              accountLabel={accountLabel}
-              entry={entry}
-              now={now}
-              primary={false}
-              redeem={redeem}
-              popover={popover}
-            />
+            <SecondaryRow key={entry.key} entry={entry} {...windowProps} />
           ))}
         </div>
       ) : null}
@@ -314,13 +387,6 @@ function LimitProviderSection({
   return (
     <section className={cn("min-w-0", wide && "col-span-full")}>
       <h2 className="ms-0.5 mb-2.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-sm font-semibold text-foreground">
-        <ProviderInstanceIcon
-          driverKind={section.driver}
-          displayName={label}
-          indicatorBackground="var(--background)"
-          className="size-5"
-          iconClassName="size-4 text-foreground/80"
-        />
         {label}
         {nextRefill ? (
           <span className="ms-auto text-xs font-normal text-muted-foreground tabular-nums">

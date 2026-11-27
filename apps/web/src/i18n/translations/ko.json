@@ -1,4 +1,6 @@
 {
+  "b2d6a05df3eb93c3": "주간 초기화: {date}",
+  "1c0f3be8d435eaf1": "{date}에 초기화",
   "673adfb94a981695": "캐시 {percent}",
   "af1b37a01a6b26ba": "{count, plural, other {{count}턴}}",
   "c3dcb57723374860": "미완료",

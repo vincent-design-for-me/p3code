@@ -118,9 +118,10 @@ setting removes it from `settings.json`.
 ## Track subscription limits
 
 **Usage → Limits** shows every subscription account it can see, grouped by provider. On web and
-desktop each account gets its own card: the dial shows how much of its 5-hour window is left (or
-its weekly window when it has no 5-hour limit), and the rows below show its other windows. The
-mark on each bar is an even pace: if the fill is left of it, you are spending faster than the
+desktop each account gets its own card. Its 5-hour limits sit in small chips (Antigravity has one
+for Gemini and one for the shared Claude & GPT quota), the large bar is the weekly limit that will
+run out first, with its reset date under the account name, and any other windows are listed below.
+The mark on each bar is an even pace: if the fill is left of it, you are spending faster than the
 window allows. A provider with several accounts shows when the next refill lands and how much it
 hands back. Tap or hover a window for the account's plan, where it is signed in, and its reset
 time. Codex and Claude accounts with banked reset credits show a count and the **Use reset**
