@@ -31,7 +31,10 @@ const RING_TIMINGS = [
 ];
 const POP_EASING = "cubic-bezier(.2,1.5,.4,1)";
 
-/** The landing on the top level: the thumb pops, a flash and rings burst, the name and the card light up. */
+/**
+ * The landing on the top level: the thumb pops, a flash and rings burst, the name and the card
+ * light up. Returns a cleanup that removes the rings if the slider leaves the top or unmounts first.
+ */
 function playLanding(root: HTMLElement) {
   const color = getComputedStyle(root).getPropertyValue("--effort-color").trim();
   const glow = (percent: number) => `color-mix(in srgb, ${color} ${percent}%, transparent)`;
@@ -39,34 +42,51 @@ function playLanding(root: HTMLElement) {
     element: Element | null | undefined,
     keyframes: Keyframe[],
     options: KeyframeAnimationOptions,
-  ) => {
-    if (element && typeof element.animate === "function") {
-      element.animate(keyframes, { ...options, delay: LANDING_DELAY_MS + (options.delay ?? 0) });
-    }
-  };
-  play(
-    root.querySelector("[data-effort-flash]"),
+  ) =>
+    element && typeof element.animate === "function"
+      ? element.animate(keyframes, { ...options, delay: LANDING_DELAY_MS + (options.delay ?? 0) })
+      : undefined;
+
+  // The flash and rings outgrow the card. A fixed layer on the body lets them spill past it without
+  // its scroll area growing a scrollbar. It sits where the thumb lands: half a thumb in from the end.
+  const track = root.querySelector("[data-effort-anchor]")?.parentElement?.getBoundingClientRect();
+  const layer = track ? document.createElement("div") : null;
+  if (layer && track) {
+    layer.dataset.effortLanding = "";
+    layer.style.setProperty("--effort-color", color);
+    layer.style.left = `${track.right - 14}px`;
+    layer.style.top = `${track.top + track.height / 2}px`;
+    layer.innerHTML =
+      "<span data-effort-flash></span>" +
+      "<span data-effort-ring></span>".repeat(RING_TIMINGS.length);
+    document.body.append(layer);
+  }
+  const flash = play(
+    layer?.querySelector("[data-effort-flash]"),
     [
       { opacity: 1, transform: "scale(.3)" },
       { opacity: 0, transform: "scale(1.9)" },
     ],
     { duration: 550, easing: "cubic-bezier(.1,.8,.3,1)" },
   );
-  root.querySelectorAll("[data-effort-ring]").forEach((ring, index) =>
+  const rings = [...(layer?.querySelectorAll("[data-effort-ring]") ?? [])].map((ring, index) =>
     play(
       ring,
       [
         { opacity: 1, transform: "scale(1)" },
-        { opacity: 0, transform: "scale(4.2, 2.8)" },
+        { opacity: 0, transform: "scale(3.6)" },
       ],
       { ...RING_TIMINGS[index], easing: "cubic-bezier(.1,.75,.3,1)" },
     ),
+  );
+  void Promise.allSettled([flash, ...rings].map((animation) => animation?.finished)).then(() =>
+    layer?.remove(),
   );
   play(
     root.querySelector("[data-effort-thumb]"),
     [
       { transform: "scale(.82)", easing: POP_EASING },
-      { transform: "scale(1.28, 1.16)", easing: POP_EASING, offset: 0.4 },
+      { transform: "scale(1.24)", easing: POP_EASING, offset: 0.4 },
       { transform: "scale(1)" },
     ],
     { duration: 550 },
@@ -88,6 +108,7 @@ function playLanding(root: HTMLElement) {
     ],
     { duration: 1000, easing: "cubic-bezier(.2,.8,.2,1)" },
   );
+  return () => layer?.remove();
 }
 
 /**
@@ -153,7 +174,7 @@ export function EffortSlider<Id>(props: {
     const reduced =
       typeof window.matchMedia === "function" &&
       window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-    if (land && !reduced) playLanding(root);
+    return land && !reduced ? playLanding(root) : undefined;
   }, [atTop]);
 
   const fast = props.fast === true && !disabled;
@@ -190,9 +211,7 @@ export function EffortSlider<Id>(props: {
   return (
     <div
       ref={rootRef}
-      // The landing rings and flash outgrow the slider; clipping them here keeps them out of the
-      // card's scroll area, where they would flash a scrollbar that pushes the content left.
-      className="grid gap-1.5 overflow-y-clip"
+      className="grid gap-1.5"
       data-effort-slider
       data-top={atTop || undefined}
       data-fast={fast || undefined}
@@ -285,17 +304,6 @@ export function EffortSlider<Id>(props: {
           style={{ left: trackPosition(fill) }}
         >
           <span data-effort-glow className="absolute -inset-2 rounded-full" />
-          <span
-            data-effort-flash
-            className="absolute top-1/2 left-1/2 -mt-8 -ml-8 size-16 rounded-full"
-          />
-          {RING_TIMINGS.map((timing) => (
-            <span
-              key={timing.duration}
-              data-effort-ring
-              className="absolute inset-0 rounded-full"
-            />
-          ))}
           <span
             key={moved ? `thumb-${index}` : "thumb"}
             data-effort-thumb

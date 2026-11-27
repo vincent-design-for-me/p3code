@@ -142,11 +142,34 @@ it("keeps the top level's glow inside the effort card", async () => {
   await expect.element(screen.getByRole("slider", { name: "Reasoning" })).toBeVisible();
   const section = document.querySelector<HTMLElement>("[data-model-picker-effort]")!;
   const card = section.parentElement!.getBoundingClientRect();
-  // The landing flash and rings are brief and clipped on purpose; what stays on screen must fit.
+  // The landing flash and rings play on a layer outside the card; what stays in it must fit.
   for (const part of section.querySelectorAll("[data-effort-glow], [data-effort-thumb]")) {
     expect(part.getBoundingClientRect().right).toBeLessThanOrEqual(card.right);
   }
   expect(getComputedStyle(section).overflowX).toBe("hidden");
+});
+
+it("plays the top level's rings outside the card and clears them on leaving it", async () => {
+  await using screen = await render(
+    <CompactPickerStack effort={<Slider onCommit={() => {}} />} onLeaveEffort={() => {}}>
+      <div />
+    </CompactPickerStack>,
+    { router: false }, // no routes involved
+  );
+  const slider = screen.getByRole("slider", { name: "Thinking" });
+  await expect.element(slider).toHaveAttribute("aria-valuetext", "Medium");
+  (slider.element() as HTMLInputElement).focus();
+
+  await userEvent.keyboard("{ArrowRight}");
+  await expect.element(slider).toHaveAttribute("aria-valuetext", "High");
+  const layer = document.querySelector("[data-effort-landing]")!;
+  // Outside the card's scroll area, so the growing rings neither clip nor raise its scrollbar.
+  expect(layer.parentElement).toBe(document.body);
+  expect(layer.querySelectorAll("[data-effort-ring]")).toHaveLength(3);
+
+  await userEvent.keyboard("{ArrowLeft}");
+  await expect.element(slider).toHaveAttribute("aria-valuetext", "Medium");
+  expect(document.querySelector("[data-effort-landing]")).toBeNull();
 });
 
 it("locks the slider while ultrathink sits in the prompt", async () => {

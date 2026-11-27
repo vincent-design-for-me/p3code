@@ -128,7 +128,20 @@
   animation: p3-effort-burst 650ms 240ms ease-out both;
 }
 
+/* Above the popups (z 130), sized to nothing so it only places the flash and rings at the thumb. */
+[data-effort-landing] {
+  position: fixed;
+  z-index: 131;
+  pointer-events: none;
+}
+
+[data-effort-landing] > * {
+  position: absolute;
+  border-radius: 9999px;
+}
+
 [data-effort-flash] {
+  inset: -32px;
   background: radial-gradient(
     circle,
     white 0%,
@@ -139,6 +152,7 @@
 }
 
 [data-effort-ring] {
+  inset: -16px;
   border: 2px solid var(--effort-color);
   opacity: 0;
 }
