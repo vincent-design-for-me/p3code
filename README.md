@@ -74,15 +74,6 @@ git fetch upstream && git merge upstream/main
 vp run check:no-telemetry
 ```
 
-## Documentation
-
-- [Install and first run](./docs/user/install.md)
-- [Remote access from a phone or another machine](./docs/user/remote-access.md)
-- [Permission modes](./docs/user/permission-modes.md)
-- [FAQ](./docs/user/faq.md)
-
-[All docs](./docs/README.md) has the full list. Upstream docs still say "T3 Code" in many places.
-
 ## License
 
 The source code is licensed under the [MIT License](./LICENSE), which keeps the original
