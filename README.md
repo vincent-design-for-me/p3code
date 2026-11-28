@@ -6,6 +6,12 @@
 
 <p align="center">A private, telemetry-free control plane for coding agents.</p>
 
+<p align="center">
+  <a href="https://github.com/vincent-design-for-me/p3code/releases/latest/download/P3-Code-arm64.dmg"><strong>Download for macOS (Apple Silicon)</strong></a>
+  ·
+  <a href="https://github.com/vincent-design-for-me/p3code/releases">All versions</a>
+</p>
+
 > **P3 Code is an unofficial fork of the [T3 Code](https://github.com/pingdotgg/t3code) source code.**
 > It is not affiliated with, endorsed by, or maintained by T3 Tools, Inc. "T3 Code" and its logos are
 > trademarks of T3 Tools, Inc.; see [TRADEMARK.md](./TRADEMARK.md).
@@ -29,9 +35,9 @@ Codex, Cursor, OpenCode, Grok Build, Antigravity, Kiro, Pi, Muse Code, fx, and a
 
 ## Install on macOS
 
-Download the latest `P3-Code-*-arm64.dmg` (Apple Silicon) from
-[Releases](https://github.com/vincent-design-for-me/p3code/releases), open it, and drag
-**P3 Code** to Applications.
+[Download the latest DMG](https://github.com/vincent-design-for-me/p3code/releases/latest/download/P3-Code-arm64.dmg)
+(Apple Silicon), open it, and drag **P3 Code** to Applications. The installer window shows its
+version. Earlier versions are on [Releases](https://github.com/vincent-design-for-me/p3code/releases).
 
 The app is not signed with an Apple Developer ID, so the first launch is blocked as unverified.
 Click **Done**, then open **System Settings → Privacy & Security** and click **Open Anyway** next
