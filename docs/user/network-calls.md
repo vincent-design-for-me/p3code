@@ -13,15 +13,18 @@ These are the only things that leave it, and each one happens because you starte
 - **Agent update checks.** Off by default. Turn on **Provider update checks** in
   **Settings > Maintenance** to have P3 Code ask each agent's release server (such as
   `releases.openai.com` and `downloads.claude.ai`) or your npm registry for newer agent CLIs.
+- **App update checks.** **Check for Updates** in **Settings > About** asks GitHub's API for the
+  latest P3 Code release, sending nothing that identifies you. Turn on **Check for updates on
+  launch** to ask once each time the app starts. A newer version opens its DMG download in your
+  browser; P3 Code never downloads or installs it in the background.
 - **Installing the P3 Code runtime.** `t3 service install`, `t3 update`, and starting P3 Code on an
   SSH host download the runtime from this fork's GitHub releases. Set `T3CODE_RELEASE_BASE_URL` to
   use another source.
 
 The model list ships with the app. T3 Connect is not available, and links you copy (threads,
 prompts, pairing) point at your own server or open the installed app, never a hosted website.
-Desktop builds check for app updates only when the build includes an update feed; set
-`T3CODE_DISABLE_AUTO_UPDATE=1` to turn that off. The mobile app never checks for over-the-air
-updates.
+The built-in desktop updater stays off because release builds include no update feed. The
+mobile app never checks for over-the-air updates.
 
 Logs, trace files (`server.trace.ndjson`, `desktop.trace.ndjson`), crash details shown in
 **Settings > Diagnostics**, and resource history stay on your devices until you copy them yourself.

@@ -76,6 +76,7 @@ import { ProjectDefaultsSettings } from "./ProjectDefaultsSettings";
 import { ThreadTitleInstructionsSettings } from "./ThreadTitleInstructionsSettings";
 import { SnoozePresetsRow } from "./SnoozePresetsSettings";
 import { useDesktopUpdateState } from "../../state/desktopUpdate";
+import { P3LaunchCheckRow, P3UpdateButton, P3UpdateDescription } from "../p3/updates/P3Updates";
 import { managedTelemetryOffMessage, usePrimaryManagedPolicy } from "../../state/managedPolicy";
 import {
   getTextGenerationModelOptionsByInstance,
@@ -345,31 +346,39 @@ function AboutVersionSection() {
       : (getDesktopUpdateDisabledReason(updateState, updatesDenial, messages) ??
         gt("Current version of the application."));
 
+  // P3 Code ships without an update feed; it checks GitHub Releases and downloads the DMG instead.
+  const p3Updates = hasDesktopBridge && updateState?.enabled === false;
+
   return (
     <>
       <SettingsRow
         id={setting("app-version").id}
         title={<AboutVersionTitle />}
-        description={description}
+        description={p3Updates ? <P3UpdateDescription /> : description}
         managed={updatesDenial}
         control={
-          <Tooltip>
-            <TooltipTrigger
-              render={
-                <Button
-                  size="sm"
-                  variant="outline"
-                  disabled={buttonDisabled || isUpdateActionPending}
-                  onClick={handleButtonClick}
-                >
-                  {buttonLabel}
-                </Button>
-              }
-            />
-            {buttonTooltip ? <TooltipPopup>{buttonTooltip}</TooltipPopup> : null}
-          </Tooltip>
+          p3Updates ? (
+            <P3UpdateButton onCheck={() => void checkProviderUpdates()} />
+          ) : (
+            <Tooltip>
+              <TooltipTrigger
+                render={
+                  <Button
+                    size="sm"
+                    variant="outline"
+                    disabled={buttonDisabled || isUpdateActionPending}
+                    onClick={handleButtonClick}
+                  >
+                    {buttonLabel}
+                  </Button>
+                }
+              />
+              {buttonTooltip ? <TooltipPopup>{buttonTooltip}</TooltipPopup> : null}
+            </Tooltip>
+          )
         }
       />
+      {p3Updates ? <P3LaunchCheckRow /> : null}
       {hasDesktopBridge ? (
         <SettingsRow
           {...setting("update-track")}

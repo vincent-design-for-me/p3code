@@ -50,7 +50,9 @@ download quarantine once, then open it as usual:
 xattr -dr com.apple.quarantine "/Applications/P3 Code.app"
 ```
 
-P3 Code does not update itself. Download a newer release, or build from source, to update.
+To update, click **Check for Updates** in **Settings > About**, or turn on **Check for updates
+on launch** there. A newer version downloads as a DMG you drag over the old app, and macOS asks
+you to **Open Anyway** once more for each new version.
 
 ## Build from source
 
