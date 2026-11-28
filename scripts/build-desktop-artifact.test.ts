@@ -603,7 +603,14 @@ it.layer(NodeServices.layer)("build-desktop-artifact", (it) => {
             undefined,
             undefined,
           );
-          const mac = config.mac as { extendInfo: Record<string, unknown> };
+          const mac = config.mac as {
+            extendInfo: Record<string, unknown>;
+            identity?: string;
+            hardenedRuntime?: boolean;
+          };
+          // Unsigned builds seal ad hoc, or a downloaded copy opens as "damaged".
+          assert.equal(mac.identity, signed ? undefined : "-");
+          assert.equal(mac.hardenedRuntime, signed ? undefined : false);
           for (const key of [
             "NSCalendarsUsageDescription",
             "NSCalendarsFullAccessUsageDescription",

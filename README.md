@@ -33,8 +33,12 @@ Download the latest `P3-Code-*-arm64.dmg` (Apple Silicon) from
 [Releases](https://github.com/vincent-design-for-me/p3code/releases), open it, and drag
 **P3 Code** to Applications.
 
-The app is not signed with an Apple Developer ID, so macOS may say it "is damaged and can't be
-opened" the first time. Clear the download quarantine once, then open it as usual:
+The app is not signed with an Apple Developer ID, so the first launch is blocked as unverified.
+Click **Done**, then open **System Settings → Privacy & Security** and click **Open Anyway** next
+to P3 Code. You only need to do this once.
+
+Releases before 0.1.13 say the app "is damaged and can't be opened" instead. For those, clear the
+download quarantine once, then open it as usual:
 
 ```sh
 xattr -dr com.apple.quarantine "/Applications/P3 Code.app"
